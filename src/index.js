@@ -9,6 +9,7 @@ import MapHolder from './MapHolder';
 //                            location_field="location"
 //                            default_zoom="3"
 //                            map_container="map"
+//                            restrict_to_india={true}
 //                            url_response_geohash_field="document"
 //                            color_scheme="YlOrRd"
 //                            legend_stops="9" />,

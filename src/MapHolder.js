@@ -20,8 +20,9 @@ class MapHolder extends Component {
         container: this.props.map_container,
         style: style,
         center: [79, 21],
-        zoom: 4,
-        hash: true
+        hash: true,
+        maxBounds: this.props.restrict_to_india ?
+        [[42, 4], [117, 39]] : null
       });
 
       var nav = new mapboxgl.NavigationControl();
