@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import MapData from './MapData';
 import mapboxgl from 'mapbox-gl';
-import style from './css/style.json'
+import style from './css/style.json';
 
 mapboxgl.accessToken = 'undefined';
 
@@ -30,6 +30,12 @@ class MapHolder extends Component {
 
       var fs = new mapboxgl.FullscreenControl();
       map.addControl(fs);
+
+      var location = new mapboxgl.GeolocateControl({
+        positionOptions: {
+          enableHighAccuracy: true
+        },trackUserLocation: true});
+      map.addControl(location);
 
       this.setState({
         map : map

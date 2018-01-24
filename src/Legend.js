@@ -16,8 +16,8 @@ class Legend extends Component {
       <div className="main-container">
         <div className="main">
           <div className='mb6'>
-            <h2 className="txt-bold txt-s block">Observations</h2>
-            <p className='txt-s color-gray'>Filtered Observations</p>
+            <h2 className="txt-bold txt-s block">Legend</h2>
+            <p className='txt-s color-gray'>1 sqaure = {this.props.area}</p>
           </div>
           {this.props.stops.map(renderLegendKeys)}
         </div>

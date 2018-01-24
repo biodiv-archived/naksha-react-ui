@@ -5,6 +5,7 @@ import GeohashAggr from './geohash/geohash-aggregated-geojson'
 import LegendStops from './legend-stops'
 import axios from 'axios';
 import mapboxgl from 'mapbox-gl';
+import turfArea from '@turf/area';
 
 mapboxgl.accessToken = 'undefined';
 
@@ -15,6 +16,7 @@ class MapData extends Component {
     this.state = {
       data: [],
       stops: [],
+      area: undefined,
       zoom: this.props.default_zoom
     }
 
@@ -76,7 +78,8 @@ class MapData extends Component {
         data = data[Object.keys(data)[0]].buckets
 
         var geojson = level === -1 ? Geohash(data) : GeohashAggr(data, level);
-        var stops = LegendStops(this.props.color_scheme, this.props.legend_stops, geojson.max_count)
+        var stops = LegendStops(this.props.color_scheme, this.props.legend_stops, geojson.max_count);
+        this.updateArea(geojson.geojson)
         this.setState({
           data: geojson,
           stops: stops
@@ -86,6 +89,15 @@ class MapData extends Component {
       .catch((err) => {
         console.log('error ' + err);
       })
+  }
+
+  updateArea(geojson) {
+    let areaSqm = Math.round(turfArea(geojson.features[0]));
+    let area = areaSqm < 1000000 ? (areaSqm/1000000).toFixed(3) : Math.round(areaSqm/1000000);
+    area += " sq km"
+    this.setState({
+      area : area
+    });
   }
 
   componentDidMount() {
@@ -99,6 +111,7 @@ class MapData extends Component {
             map = {this.props.map}
             data = {this.state.data}
             stops = {this.state.stops}
+            area = {this.state.area}
             />
       </div>
     )

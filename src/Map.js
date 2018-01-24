@@ -5,7 +5,7 @@ mapboxgl.accessToken = 'undefined';
 
 class Map extends Component {
 
-  ApplyMapData() {
+  applyMapData() {
 
     this.props.map.on('load', () => {
       this.props.map.addSource('observations', {
@@ -72,7 +72,7 @@ class Map extends Component {
   }
 
   componentDidMount() {
-    this.ApplyMapData();
+    this.applyMapData();
   }
 
   componentDidUpdate() {
@@ -81,7 +81,7 @@ class Map extends Component {
 
   render() {
     return (
-      <Legend stops = {this.props.stops} />
+      <Legend stops = {this.props.stops} area = {this.props.area} />
     )
   }
 }
