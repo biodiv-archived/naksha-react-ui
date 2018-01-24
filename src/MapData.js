@@ -93,8 +93,9 @@ class MapData extends Component {
 
   updateArea(geojson) {
     let areaSqm = Math.round(turfArea(geojson.features[0]));
-    let area = areaSqm < 1000000 ? (areaSqm/1000000).toFixed(3) : Math.round(areaSqm/1000000);
-    area += " sq km"
+    let side = areaSqm/Math.sqrt(2);
+    side = areaSqm < 1000000 ? (side/1000000).toFixed(3) : Math.round(side/1000000);
+    let area = side + "*" + side + " km"
     this.setState({
       area : area
     });

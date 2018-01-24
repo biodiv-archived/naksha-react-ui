@@ -37,7 +37,7 @@ class Map extends Component {
       });
 
       // Change the cursor to a pointer when the mouse is over the places layer.
-      this.props.map.on('mouseenter', 'observations', function (e) {
+      this.props.map.on('mousemove', 'observations', function (e) {
           this.getCanvas().style.cursor = 'pointer';
           popup.setLngLat(e.lngLat)
           .setHTML("Count "+e.features[0].properties.doc_count)
@@ -61,14 +61,13 @@ class Map extends Component {
       source.setData(this.props.data.geojson);
 
     var property = "doc_count";
-    var stops = this.props.stops;
-    if (stops.length > 0)
-      this.props.map.on('load', () => {
-        this.props.map.setPaintProperty('observations', 'fill-color', {
-          property,
-          stops
-        });
-     });
+    if(this.props.map.getLayer("observations")) {
+      var stops = this.props.stops;
+      this.props.map.setPaintProperty('observations', 'fill-color', {
+        property,
+        stops
+      });
+    }
   }
 
   componentDidMount() {
