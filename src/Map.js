@@ -10,7 +10,7 @@ class Map extends Component {
     this.props.map.on('load', () => {
       this.props.map.addSource('observations', {
         type: 'geojson',
-        data: this.props.data.geojson
+        data: this.props.data
       });
 
       this.props.map.addLayer({
@@ -58,7 +58,7 @@ class Map extends Component {
   setFill() {
     var source = this.props.map.getSource("observations");
     if (source)
-      source.setData(this.props.data.geojson);
+      source.setData(this.props.data);
 
     var property = "doc_count";
     if(this.props.map.getLayer("observations")) {

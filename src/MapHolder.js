@@ -51,6 +51,7 @@ class MapHolder extends Component {
             location_field = {this.props.location_field}
             default_zoom = {this.props.default_zoom}
             url_response_geohash_field={this.props.url_response_geohash_field}
+            url_response_filtered_geohash_field={this.props.url_response_filtered_geohash_field}
             color_scheme = {this.props.color_scheme}
             legend_stops = {this.props.legend_stops}
             map = {this.state.map} />

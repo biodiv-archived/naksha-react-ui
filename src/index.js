@@ -11,6 +11,8 @@ import MapHolder from './MapHolder';
 //                            map_container="map"
 //                            restrict_to_india={true}
 //                            url_response_geohash_field="document"
+//                            url_response_geohash_field="geohashAggregation"
+//                            url_response_filtered_geohash_field="viewFilteredgeohashAggregation"
 //                            color_scheme="YlOrRd"
 //                            legend_stops="9" />,
 //                            document.getElementById('root'));
