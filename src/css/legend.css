@@ -10,9 +10,9 @@
 .main {
   background-color: #fff;
   position: absolute;
-  right: 0;
+  left: 0;
   bottom: 0;
-  margin-right: 12px;
+  margin-left: 12px;
   margin-bottom: 24px;
   padding: 12px;
   box-shadow: 0 0 10px 2px rgba(31, 51, 73, 0.10);

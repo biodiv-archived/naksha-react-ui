@@ -5,7 +5,7 @@ import MapHolder from './MapHolder';
 // import React from 'react';
 // import ReactDOM from 'react-dom';
 //
-// ReactDOM.render(<MapHolder url="http://localhost:8080/naksha/services/geohash-aggregation/biodiv/observations"
+// ReactDOM.render(<MapHolder url="http://localhost:8080/naksha/services/geohash-aggregation/observation/observations"
 //                            location_field="location"
 //                            default_zoom="3"
 //                            map_container="map"
@@ -14,7 +14,7 @@ import MapHolder from './MapHolder';
 //                            url_response_filtered_geohash_field="document"
 //                            color_scheme="YlOrRd"
 //                            legend_stops="9"
-//                            on_click={function} />,
+//                            on_click={function}
 //                            document.getElementById('root'));
 
 export default MapHolder;
