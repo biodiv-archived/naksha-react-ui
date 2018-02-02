@@ -94,27 +94,29 @@ class MapData extends Component {
     if(!zoom)
       zoom = this.state.zoom;
     if(zoom < 5)
-      return [3, -1];
+      return [4, 1];
     else if(zoom < 6)
-      return [4, 0]
-    else if(zoom < 7)
       return [4, 1]
-    else if(zoom < 8)
+    else if(zoom < 7)
       return [5, 0]
-    else if(zoom < 9)
+    else if(zoom < 8)
       return [5, 1]
-    else if(zoom < 10)
+    else if(zoom < 9)
       return [5, -1]
-    else if(zoom < 11)
+    else if(zoom < 10)
       return [6, 0]
-    else if(zoom < 12)
+    else if(zoom < 11)
       return [6, 1]
-    else if(zoom < 13)
+    else if(zoom < 12)
       return [7, 0]
-    else if(zoom < 14)
+    else if(zoom < 13)
       return [7, 1]
+    else if(zoom < 14)
+      return [7, -1]
+    else if(zoom < 15)
+      return [8, 0];
 
-    return [7, -1];
+    return [8, 1];
   }
 
   setData(zoom, bounds, onlyFilteredAggregation) {

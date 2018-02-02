@@ -69,6 +69,9 @@ class Map extends Component {
   }
 
   setFill() {
+    if(!this.props.stops)
+      return;
+      
     let source = this.props.map.getSource("observations");
     if (source)
       source.setData(this.props.data);
