@@ -5,6 +5,23 @@ mapboxgl.accessToken = 'undefined';
 
 class Map extends Component {
 
+  onClick(e) {
+    this.props.on_click(e, e.features[0].geometry.coordinates)
+    .then( (fulfilled) => {
+          return new mapboxgl.Popup()
+              .setLngLat(e.lngLat)
+              .setHTML(fulfilled)
+              .addTo(this.props.map);
+      })
+      .catch(function (error) {
+          console.log(error.message);
+      });
+  }
+
+  setOnClick() {
+    this.props.map.on('click', 'observations', this.onClick.bind(this));
+  }
+
   applyMapData() {
 
     this.props.map.on('load', () => {
@@ -23,15 +40,11 @@ class Map extends Component {
           }
       });
 
-      this.props.map.on('click', 'observations', function (e) {
-          new mapboxgl.Popup()
-              .setLngLat(e.lngLat)
-              .setHTML("Count "+e.features[0].properties.doc_count)
-              .addTo(this);
-      });
+      if(this.props.on_click)
+        this.setOnClick();
 
       // Create a popup, but don't add it to the map yet.
-      var popup = new mapboxgl.Popup({
+      let popup = new mapboxgl.Popup({
           closeButton: false,
           closeOnClick: false
       });
@@ -56,13 +69,13 @@ class Map extends Component {
   }
 
   setFill() {
-    var source = this.props.map.getSource("observations");
+    let source = this.props.map.getSource("observations");
     if (source)
       source.setData(this.props.data);
 
-    var property = "doc_count";
+    let property = "doc_count";
     if(this.props.map.getLayer("observations")) {
-      var stops = this.props.stops;
+      let stops = this.props.stops;
       this.props.map.setPaintProperty('observations', 'fill-color', {
         property,
         stops

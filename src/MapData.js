@@ -150,7 +150,6 @@ class MapData extends Component {
     data = data[Object.keys(data)[0]].buckets;
 
     let geojson = level === -1 ? Geohash(data) : GeohashAggr(data, level);
-    console.log(geojson.geojson);
     this.setState({
       data: geojson.geojson
     });
@@ -162,7 +161,6 @@ class MapData extends Component {
     data = data[Object.keys(data)[0]].buckets;
 
     let geojson = level === -1 ? Geohash(data) : GeohashAggr(data, level);
-    console.log(geojson.geojson);
     let stops = LegendStops(this.props.color_scheme, this.props.legend_stops, geojson.max_count);
     this.updateArea(geojson.geojson);
 
@@ -190,6 +188,7 @@ class MapData extends Component {
       <div>
           <Map
             map = {this.props.map}
+            on_click = {this.props.on_click}
             data = {this.state.data}
             stops = {this.state.stops}
             area = {this.state.area}

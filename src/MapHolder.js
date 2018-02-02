@@ -21,8 +21,7 @@ class MapHolder extends Component {
         style: style,
         center: [79, 21],
         hash: true,
-        maxBounds: this.props.restrict_to_india ?
-        [[42, 4], [117, 39]] : null
+        maxBounds: this.props.restrict_to_bounds
       });
 
       var nav = new mapboxgl.NavigationControl();
@@ -54,6 +53,7 @@ class MapHolder extends Component {
             url_response_filtered_geohash_field={this.props.url_response_filtered_geohash_field}
             color_scheme = {this.props.color_scheme}
             legend_stops = {this.props.legend_stops}
+            on_click = {this.props.on_click}
             map = {this.state.map} />
       </div>
     )

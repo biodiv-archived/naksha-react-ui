@@ -9,12 +9,12 @@ import MapHolder from './MapHolder';
 //                            location_field="location"
 //                            default_zoom="3"
 //                            map_container="map"
-//                            restrict_to_india={true}
+//                            restrict_to_bounds={[[42, 4], [117, 39]]}
 //                            url_response_geohash_field="document"
-//                            url_response_geohash_field="geohashAggregation"
-//                            url_response_filtered_geohash_field="viewFilteredgeohashAggregation"
+//                            url_response_filtered_geohash_field="document"
 //                            color_scheme="YlOrRd"
-//                            legend_stops="9" />,
+//                            legend_stops="9"
+//                            on_click={function} />,
 //                            document.getElementById('root'));
 
 export default MapHolder;
