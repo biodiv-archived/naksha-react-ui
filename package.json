@@ -4,8 +4,11 @@
   "dependencies": {
     "@turf/area": "^5.1.5",
     "axios": "^0.17.1",
+    "base-64": "^0.1.0",
     "boundingbox": "^0.1.1",
+    "font-awesome": "^4.7.0",
     "geohash": "0.0.1",
+    "google-maps": "^3.2.1",
     "mapbox-gl": "^0.43.0",
     "react": "^16.2.0",
     "react-collapsible": "^2.0.3",
