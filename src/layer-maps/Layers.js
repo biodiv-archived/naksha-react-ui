@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 
-import './layers.css'
+import '../css/layers.css'
 var styling = require('./styling');
 var toggleSideBar = styling.default.toggleSideBar
 var openTab = styling.default.openTab

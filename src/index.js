@@ -1,7 +1,10 @@
 import './css/index.css';
 import './css/legend.css';
 import './css/mapbox-gl.css';
+import './css/layers.css';
 import MapHolder from './MapHolder';
+import Layers from './layer-maps/Layers';
+
 // import React from 'react';
 // import ReactDOM from 'react-dom';
 //
@@ -17,4 +20,7 @@ import MapHolder from './MapHolder';
 //                            on_click={function}
 //                            document.getElementById('root'));
 
-export default MapHolder;
+export default {
+  MapHolder : MapHolder,
+  Layers : Layers
+}
