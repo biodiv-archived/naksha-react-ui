@@ -1,26 +1,22 @@
 var mapboxgl = require('mapbox-gl')
 var GoogleMapsLoader = require('google-maps')
-var Base64 = require('base-64')
-var encode = Base64.encode
-// var encode = Base64.default.encode
-// var set_initial_zoom from './sync'
-var sync = require('./sync.js')
-var set_initial_zoom = sync.set_initial_zoom
-var syncMaps = sync.syncMaps
-var sync_map_move = sync.sync_map_move
+//var sync = require('./sync.js')
+//var set_initial_zoom = sync.set_initial_zoom
+//var syncMaps = sync.syncMaps
+//var sync_map_move = sync.sync_map_move
 
-var baseUrl = "http://" + get_host() + "/geoserver/"
+var baseUrl = "http://" + get_host() + "/naksha/geoserver/"
 var workspace_name = 'biodiv'
-var geoserver_user = ''
-var geoserver_pass = ''
-var baseUrl_with_auth = "http://" + geoserver_user + ":" + geoserver_pass + "@" + "localhost:6792/geoserver/"
 var style_file_json_url = "http://localhost:6792/geoserver/styles/"
+var icons_url = "http://localhost:6792/geoserver/www/icons/"
 
 var current_selected_layer = null;
 var current_selected_style = null;
 
 var map_style = null;
 var active_layers = [];
+
+var initial_zoom = null;
 
 var map = null;
 var gmap = null;
@@ -42,7 +38,7 @@ function initializeMap() {
             "vector-tiles": {
                 "type" : "vector",
                 "scheme": "tms",
-                "tiles": ["http://localhost:6792/geoserver/gwc/service/tms/1.0.0/biodiv:lyr_104_india_states_census01@EPSG%3A900913@pbf/{z}/{x}/{y}.pbf"]
+                "tiles": ["http://localhost:8080/geoserver/gwc/service/tms/1.0.0/biodiv:lyr_104_india_states_census01@EPSG%3A900913@pbf/{z}/{x}/{y}.pbf"]
             }
         },
         "layers": [
@@ -91,11 +87,15 @@ function get_host_name(){
 }
 
 function get_port(){
-    return '6792';
+    return '8080';
 }
 
 function get_host(){
     return get_host_name() + ":" + get_port();
+}
+
+function getWorkspace() {
+    return workspace_name;
 }
 
 function get_map_style(){
@@ -109,46 +109,22 @@ function set_map_style(style){
 // style_name should be combination of layer name and the attribute
 // on which the styling is needed
 function getStyle(style_name){
-    var style_file_url = style_file_json_url + style_name + ".json"
+    var style_file_url = baseUrl + "styles/" + style_name + ".json"
     var style = httpGetAsync(style_file_url);
     return JSON.parse(style);
 }
 
 // gets all available styles for a layer
 function getAvailableStyles(layer){
-    var style_url = baseUrl + "rest/layers/" + layer + "/styles.json";
-    var styles = httpGetAsync(style_url);
+    var style_file_url = baseUrl + "layers/" + layer + "/styles"
+    var styles = httpGetAsync(style_file_url);
     var styles_json = JSON.parse(styles);
 
     var all_styles = styles_json.styles.style.map(feature => feature.name);
     return all_styles;
 }
 
-function createCORSRequest(method, url) {
-  var xhr = new XMLHttpRequest();
-  if ("withCredentials" in xhr) {
-
-    // Check if the XMLHttpRequest object has a "withCredentials" property.
-    // "withCredentials" only exists on XMLHTTPRequest2 objects.
-    xhr.open(method, url, false);
-
-  } else if (typeof XDomainRequest != "undefined") {
-
-    // Otherwise, check if XDomainRequest.
-    // XDomainRequest only exists in IE, and is IE's way of making CORS requests.
-    xhr = new XDomainRequest();
-    xhr.open(method, url);
-
-  } else {
-
-    // Otherwise, CORS is not supported by the browser.
-    xhr = null;
-
-  }
-  return xhr;
-}
-
-function httpGetAsync(theUrl)
+function httpGetAsync(theUrl, isXML=false)
 {
     // var xmlHttp = createCORSRequest("GET", theUrl)
     var xmlHttp = new XMLHttpRequest();
@@ -162,11 +138,12 @@ function httpGetAsync(theUrl)
         }
     }*/
     xmlHttp.open("GET", theUrl, false); // true for asynchronous
-    xmlHttp.setRequestHeader("Authorization", "Basic " + encode(geoserver_user + ":" + geoserver_pass));
     // xmlHttp.setRequestHeader('Access-Control-Allow-Origin', 'localhost:3000')
     xmlHttp.send();
-    console.log(xmlHttp.responseText);
-    return xmlHttp.responseText;
+    if (isXML)
+        return xmlHttp.responseXML;
+    else
+        return xmlHttp.responseText;
 }
 
 function print(str){
@@ -174,14 +151,81 @@ function print(str){
 }
 
 function getAvailableLayers(){
-	var url = baseUrl_with_auth + "rest/workspaces/" + workspace_name + "/featuretypes.json"
-    print(url);
-	var layers = httpGetAsync(url)
-	var layers_json = JSON.parse(layers);
-
+    // var url = baseUrl + workspace_name + '/ows?SERVICE=WFS&REQUEST=GetCapabilities';
+    var url = baseUrl + 'layers/' + workspace_name + '/wfs';
+    console.log(url);
+    var layers = [];
+    var isXML = true;
+	var response = httpGetAsync(url, isXML);
+    var featureTypeList = response.getElementsByTagName('FeatureTypeList')[0];
+    for (var i = 0; i < featureTypeList.childNodes.length; i++){
+        var feature = featureTypeList.childNodes[i];
+        // console.log(feature)
+        var layer_info = getLayerInfo_WMS_3(feature);
+        if (layer_info !== undefined){
+                layers.push(layer_info);
+        }
+    }
+    return layers
     // extract list of all available layers
-    var all_layers = layers_json.featureTypes.featureType.map(feature => feature.name);
-    return all_layers
+    // var all_layers = layers_json.featureTypes.featureType.map(feature => feature.name);
+    // return all_layers
+}
+
+function getLayerInfo_WMS_3(layerElement) {
+    var name;
+    var title;
+    var bbox;
+    var abstract;
+    var keywords = [];
+    var styles = [];
+
+    var childNodes = layerElement.childNodes;
+
+    var occurrence = getWorkspace() + ":occurrence";
+    for (var i=0; i<childNodes.length; i++) {
+        if (childNodes[i].nodeName === "Name"){
+            if (childNodes[i].childNodes[0] === undefined)
+                return;
+            name = childNodes[i].childNodes[0].nodeValue.split(':')[1];
+            if (name === occurrence)
+                return;
+        }else if (childNodes[i].nodeName === "Title"){
+            if (childNodes[i].childNodes[0] === undefined || childNodes[i].childNodes[0] === null)
+                return;
+            title = childNodes[i].childNodes[0].nodeValue;
+        }else if (childNodes[i].nodeName === "Abstract") {
+            var abstract_node = childNodes[i].childNodes[0];
+            abstract = (abstract_node !== undefined)?abstract_node.nodeValue:'';
+        }
+        else if (childNodes[i].nodeName.endsWith("BoundingBox")){
+            bbox = getLatLonBBoxString(childNodes[i]);
+        }/*else if (childNodes[i].nodeName.endsWith("Keywords"))
+            keywords = getLayerKeywords(childNodes[i]);*/
+        // else if (childNodes[i].nodeName.endsWith("Style")) {
+        //     styles.push(getStyleInfo(childNodes[i]));
+        // }
+    }
+
+    return {name: name, title: title, bbox: bbox, abstract: abstract, keywords: keywords, styles: styles};
+
+}
+
+function getLatLonBBoxString(boundingBoxElement) {
+    var lowerCorner = boundingBoxElement.childNodes[0].childNodes[0].nodeValue.split(' ');
+    var upperCorner = boundingBoxElement.childNodes[1].childNodes[0].nodeValue.split(' ');
+    var minx = lowerCorner[0];
+    var miny = lowerCorner[1];
+    var maxx = upperCorner[0];
+    var maxy = upperCorner[1];
+
+    var bboxArr = [];
+    bboxArr.push(minx);
+    bboxArr.push(miny);
+    bboxArr.push(maxx);
+    bboxArr.push(maxy);
+
+    return bboxArr.join(',');
 }
 
 function layer_changed(){
@@ -221,11 +265,8 @@ function style_changed(){
     update_map(style)
 }
 
-function sleep(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
-}
-
-async function update_map(style){
+// async function update_map(style){
+function update_map(style){
     // add_background_to_style(style)
     // print(style)
     map.setStyle(style);
@@ -263,40 +304,11 @@ function getThemeNames(theme_type) {
     return by_geography.split('///');
 }
 
-// function getLayersByTheme(theme) {
-//     var url = 'http://' + 'localhost:6792' + '/geoserver/ows';
-//
-//     var params = {
-//         request:'getLayersByTheme',
-//         service:'csw',
-//         version:'1.0.0',
-//         theme: theme
-//     };
-//
-//     var layers = [];
-//     $.ajax({
-//         url: url,
-//         type: 'GET',
-//         async: false,
-//         cache: false,
-//         timeout: 30000,
-//         data: params,
-//         dataType: 'text',
-//         error: function(){
-//             return true;
-//         },
-//         success: function(data, msg){
-//             if (parseFloat(msg)){
-//                 return false;
-//             } else {
-//                 layers = data.split('///');
-//                 return true;
-//             }
-//         }
-//     });
-//
-//     return layers;
-// }
+function expand_layer_details(layer_id) {
+    var expanded_div_id = layer_id + "_expanded";
+    var div = document.getElementById(expanded_div_id);
+    div.classList.toggle('hide');
+}
 
 function populateLayerPanel() {
     var layers = getAvailableLayers();
@@ -304,62 +316,92 @@ function populateLayerPanel() {
 
     var layer_pane_html = nav_pane.innerHTML;
     layers.forEach(function(layer){
+        layer.thumbnail = ""
         layer_pane_html +=
             "<div class='layer-div no-select'>"
-                +"<div id="+layer+" class='layer-name-div no-select' onclick='expand_layer_details(this.id)'>" + layer + "</div>\n"
-                +"<div id="+layer+"_expanded class='layer-expanded hide'>"
-                    +"<div><img class='layer-thumb'></img></div>"
-                    +"<div class='layer-desc'></div>"
-                    +"<i id=add_"+layer+"_button class='fa fa-plus-circle float-right pointer' onclick='add_layer_to_map(\""+layer+"\")' style='font-size:36px;color:green;'></i>"
-                    +"<i id=rem_"+layer+"_button class='fa fa-minus-circle float-right pointer hide' onclick='remove_layer_from_map(\""+layer+"\")' style='font-size:36px;color:red;'></i>"
+                +"<div id="+layer.name+" class='layer-name-div no-select' onclick='expand_layer_details(this.id)'>" + layer.title + "</div>"
+                +"<div id="+layer.name+"_expanded class='layer-expanded hide'>"
+                    +"<div class='layer-thumb'>"
+                    // +"<img src="+map_thumbnails_url + layer.name +"_thumb.gif></img>"
+                    +"</div>"
+                    +"<div class='layer-desc'>"+layer.abstract+"</div>"
+                    +"<i id=add_"+layer.name+"_button class='fa fa-plus-circle float-right pointer' onclick='add_layer_to_map(\""+layer.name+"\",\""+layer.title+"\")' style='font-size:36px;color:green;'></i>"
+                    +"<i id=rem_"+layer.name+"_button class='fa fa-minus-circle float-right pointer hide' onclick='remove_layer_from_map(\""+layer.name+"\")' style='font-size:36px;color:red;'></i>"
                 +"</div>"
             +"</div>"
     });
     nav_pane.innerHTML = layer_pane_html;
 }
 
-function expand_layer_details(layer_id) {
-    var expanded_div_id = layer_id + "_expanded";
-    var div = document.getElementById(expanded_div_id);
-    div.classList.toggle('hide');
-}
-
 function toggleSideBar(){
     document.getElementById("nav").classList.toggle("nav--active");
 }
 
-function add_layer_to_map(layer){
-    if(active_layers.indexOf(layer) != -1){
+function add_layer_to_map(layerName, layerTitle){
+
+    if(active_layers.indexOf(layerName) != -1){
         // layer is already active
-        alert("Layer " + layer + " is already added to map");
+        alert("Layer " + layerName + " is already added to map");
         return;
     }
-    var style_name = getAvailableStyles(layer)[0];
-    var style = getStyle(style_name);
-    console.log(style_name);
+    var all_styles = getAvailableStyles(layerName)
+    var default_style = all_styles[0];
+    var style = getStyle(default_style);
     append_new_style(style);
-    document.getElementById("add_" + layer + "_button").classList.toggle('hide');
-    document.getElementById("rem_" + layer + "_button").classList.toggle('hide');
-    active_layers.push(layer);
+    addLayerToSelectedTab(layerName, layerTitle, all_styles, style)
+    document.getElementById("add_" + layerName + "_button").classList.toggle('hide');
+    document.getElementById("rem_" + layerName + "_button").classList.toggle('hide');
+    active_layers.push(layerName);
 }
 
 function append_new_style(style){
-    if(get_map_style == null || get_map_style == {}){
+    /*if(get_map_style == null || get_map_style == {}){
         // if no style is currently present
         set_map_style(style);
     }
-    else{
+    else{*/
 
         Object.keys(style.sources).forEach(function(key){
-            if (!map.isSourceLoaded(key)) {
-            map.addSource(key, style.sources[key]);
-            console.log("Adding source " + key);
-            }
+            // if (!map.isSourceLoaded(key))
+		style.sources[key].tiles = [style.sources[key].tiles[0].replace('6792', '8080')];//[baseUrl + "gwc/service/tms/1.0.0/" + getWorkspace() + "/" + style.layers[0].id + "/EPSG%3A900913/{z}/{x}/{y}"];
+                map.addSource(key, style.sources[key]);
         })
         style.layers.forEach(function(layer){
             map.addLayer(layer)
         })
-    }
+    // }
+}
+
+function addLayerToSelectedTab(layerName, layerTitle, all_styles, style){
+    var selectedLayersPanel = document.getElementById('nav-selected-layers');
+    var html = selectedLayersPanel.innerHTML;
+    html +=  "<div id="+layerName+"_styler class='layer-div no-select'>"
+            +   "<div class='layer-name-div no-select'>" + layerTitle + "</div>\n"
+            +   "<div class='zoom-to-extent-div inline' style='background-image:url("+icons_url+"zoom-to-extent.png)'>"
+            // +   "<img src="+icons_url+"zoom-to-extent.png style='margin: 0 4% 0 0;'></img>"
+            +   "zoom to extent"
+            +   "</div>"
+            +   "<div style='width: 18%;float: left;font-size: 14px;opacity: 0.5;margin: 0 0 0 3%;'>opacity</div>"
+            +   "<div class='slidecontainer inline'>"
+            +       "<input id="+layerName+"_slider class='slider' type='range' min='1' max='100' step='5' value="+getOpacity(style)+"></input>"
+            +   "</div>"
+            +   "<div style='font-size:14px; padding-top: 7%;'>Style map by: "
+            +       "<select class='style-selector'>"
+            +           all_styles
+            +       "</select>"
+            +   "</div>"
+            +"</div>"
+
+    selectedLayersPanel.innerHTML = html;
+}
+
+function getOpacity(style){
+    if (style.layers[0].type === "circle")
+        return style.layers[0].paint['circle-opacity'] * 100
+    else if (style.layers[0].type === "fill")
+        return style.layers[0].paint['fill-opacity'] * 100
+    else
+        return 70
 }
 
 function remove_layer_from_map(layer_name){
@@ -381,15 +423,15 @@ function remove_layer_from_map(layer_name){
     console.log(map)
 }
 
-function openTab(evt, tab_name) {
+function openTab(evt, div_name) {
     // Declare all variables
     var i, tabcontent, tablinks;
-
+    console.log('div name', div_name);
     // Get all elements with class="tabcontent" and hide them
-    /*tabcontent = document.getElementsByClassName("tabcontent");
+    tabcontent = document.getElementsByClassName("tabcontent");
     for (i = 0; i < tabcontent.length; i++) {
         tabcontent[i].style.display = "none";
-    }*/
+    }
 
     // Get all elements with class="tablinks" and remove the class "active"
     tablinks = document.getElementsByClassName("tablinks");
@@ -398,7 +440,7 @@ function openTab(evt, tab_name) {
     }
 
     // Show the current tab, and add an "active" class to the button that opened the tab
-    // document.getElementById(cityName).style.display = "block";
+    document.getElementById(div_name).style.display = "block";
     evt.currentTarget.className += " active";
 }
 
@@ -488,8 +530,83 @@ function toggleAllChildren(div) {
     }
 }
 
+function set_initial_zoom(map){
+	initial_zoom = map.getZoom();
+}
+
+function syncMaps(master, google_map){
+	var center = master.getCenter();
+  	var zoom = master.getZoom();
+
+  	google_map.setCenter(center);
+	google_map.setZoom(zoom+1);
+
+	// now if zoom level was non-integer, the google map
+	// would have become blank.
+	var new_zoom;
+	if (zoom > initial_zoom)
+		new_zoom = Math.ceil(zoom);
+	else
+		new_zoom = Math.floor(zoom);
+
+	if (new_zoom === zoom)
+		return;
+	else{
+		master.setZoom(new_zoom);
+		google_map.setZoom(new_zoom + 1);
+	}
+
+}
+
+function sync_map_move(map, gmap){
+	var center = map.getCenter();
+	gmap.setCenter(center);
+}
+
+
 export default {
   toggleSideBar: toggleSideBar,
   openTab: openTab,
   initMap: initMap
 }
+
+window.initMap                     =initMap
+window.initializeMap               =initializeMap
+window.get_host_name               =get_host_name
+window.get_port                    =get_port
+window.get_host                    =get_host
+window.getWorkspace                =getWorkspace
+window.get_map_style               =get_map_style
+window.set_map_style               =set_map_style
+window.getStyle                    =getStyle
+window.getAvailableStyles          =getAvailableStyles
+window.httpGetAsync                =httpGetAsync
+window.print                       =print
+window.getAvailableLayers          =getAvailableLayers
+window.getLayerInfo_WMS_3          =getLayerInfo_WMS_3
+window.getLatLonBBoxString         =getLatLonBBoxString
+window.layer_changed               =layer_changed
+window.style_changed               =style_changed
+window.update_map                  =update_map
+window.add_background_to_style     =add_background_to_style
+window.getThemeNames               =getThemeNames
+window.expand_layer_details        =expand_layer_details
+window.populateLayerPanel          =populateLayerPanel
+window.toggleSideBar               =toggleSideBar
+window.add_layer_to_map            =add_layer_to_map
+window.append_new_style            =append_new_style
+window.addLayerToSelectedTab       =addLayerToSelectedTab
+window.getOpacity                  =getOpacity
+window.remove_layer_from_map       =remove_layer_from_map
+window.openTab                     =openTab
+window.showClickedFeature          =showClickedFeature
+window.hightlight_selected_feature =hightlight_selected_feature
+window.clear_selected_features     =clear_selected_features
+window.get_style_by                =get_style_by
+window.clear_selected_feature_tree =clear_selected_feature_tree
+window.update_selected_feature_tree=update_selected_feature_tree
+window.renderJSON                  =renderJSON
+window.toggleAllChildren           =toggleAllChildren
+window.set_initial_zoom=set_initial_zoom
+window.syncMaps        =syncMaps
+window.sync_map_move   =sync_map_move
