@@ -23,8 +23,9 @@ class Map extends Component {
   }
 
   applyMapData() {
+    if(!this.props.map._loaded || !this.props.data || this.props.map.getSource("observations"))
+      return;
 
-    this.props.map.on('load', () => {
       this.props.map.addSource('observations', {
         type: 'geojson',
         data: this.props.data
@@ -64,14 +65,12 @@ class Map extends Component {
       });
 
       this.setFill();
-    });
-
   }
 
   setFill() {
-    if(!this.props.stops)
+    if(!this.props.stops || this.props.stops.length === 0)
       return;
-      
+
     let source = this.props.map.getSource("observations");
     if (source)
       source.setData(this.props.data);
@@ -92,6 +91,10 @@ class Map extends Component {
 
   componentDidUpdate() {
     this.setFill();
+  }
+
+  componentWillReceiveProps(nextProps) {
+    this.applyMapData();
   }
 
   render() {

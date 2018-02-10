@@ -15,7 +15,7 @@ class MapData extends Component {
     super(props);
     let bounds = this.props.map.getBounds();
     this.state = {
-      data: [],
+      data: undefined,
       stops: [],
       area: undefined,
       zoom: this.props.default_zoom,
