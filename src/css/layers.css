@@ -10,6 +10,8 @@
 	width: 99%;
 	height: 80%;
 	border: black;
+	top: auto !important;
+	bottom: auto !important;
 }
 
 .map canvas {
@@ -255,4 +257,11 @@
 
 .inline {
 	display: inline;
+}
+
+.base-layer-selector {
+	position: relative;
+	float: right;
+    	margin: 1% 4% 0 0;
+    	height: 2em;
 }

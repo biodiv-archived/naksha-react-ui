@@ -17,7 +17,7 @@ class Layers extends Component {
         <button style={{margin:'0.5% 0 0 45%'}} onClick={() => toggleSideBar()}>Layers Panel</button>
       </div>
 
-      <div className='map' id='gmap'></div>
+      {/* <div className='map' id='gmap'></div> */}
       <div className='map' id='map'></div>
 
       <div id='nav' className='left-nav border-inside fill-height'>
@@ -26,10 +26,10 @@ class Layers extends Component {
               <button className='tablinks' onClick={(e) => openTab(e, "nav-selected-layers")}>Selected Layers</button>
           </div>
           <div id='nav-all-layers' className='tabcontent'></div>
-          <div id='nav-selected-layers' className='tabcontent hide'></div>
+          <div id='nav-selected-layers' className='tabcontent'></div>
       </div>
 
-      <div id='features'></div>
+      <div id='features' className='hide'></div>
       </div>
     );
   }

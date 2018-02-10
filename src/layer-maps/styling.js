@@ -20,52 +20,105 @@ var initial_zoom = null;
 
 var map = null;
 var gmap = null;
+
 function initMap() {
     var india_center = {lat: 25, lng: 77};
-    GoogleMapsLoader.load(function(google) {
-        gmap = new google.maps.Map(document.getElementById('gmap'), {
-        zoom: 4,
-        center: india_center
-      });
-    })
-    initializeMap();
+    var zoom = 4;
+    var gZoom = zoom + 1; // Google zoom levels are one higher than mapboxgl
+    initMapboxglMap(india_center, zoom);
+    // initGoogleMap(india_center, gZoom);
+    // SyncGoogleAndMapboxglMaps(map, gmap);
+    populateLayerPanel();
 }
 
-function initializeMap() {
-    var india_boundary = {
-        version: 8,
-        sources: {
-            "vector-tiles": {
-                "type" : "vector",
-                "scheme": "tms",
-                "tiles": ["http://localhost:8080/geoserver/gwc/service/tms/1.0.0/biodiv:lyr_104_india_states_census01@EPSG%3A900913@pbf/{z}/{x}/{y}.pbf"]
-            }
-        },
-        "layers": [
-                /*{
-                    "id": "background",
-                    "type": "raster",
-                    "source": "background"
-                },*/
-              /*  {
-                "id": "vector-layer",
-                "type": "line",
-                "source": "vector-tiles",
-                "source-layer": "lyr_104_india_states_census01",
-                "paint": {
-                    'line-color': '#aaaaaa'
-                }}*/
-        ]
-    };
+function initGoogleMap(center, zoom) {
+    GoogleMapsLoader.load(function(google) {
+        gmap = new google.maps.Map(document.getElementById('gmap'), {
+        zoom: zoom,
+        center: center
+      });
+    })
+}
 
+function initMapboxglMap(center, zoom) {
+    mapboxgl.accessToken = 'pk.eyJ1IjoicHJpeWFuc2h1LWEiLCJhIjoiY2phMmQ1bTFvNzRjZDMzcGdiNmQ5a3k5YSJ9.cpBkEIu8fQFAgx1cYuTQVg';
     map = new mapboxgl.Map({
           container: 'map',
-          center: [77, 25],
-          zoom: 3,
-          style: india_boundary
+          center: [center.lng, center.lat],
+          zoom: zoom,
+          style: 'mapbox://styles/mapbox/basic-v9' //india_boundary
         });
     map.addControl(new mapboxgl.NavigationControl());
+    addBaseLayerSelector(map);
+    console.log(map.style);
+}
 
+function addBaseLayerSelector() {
+    var base_layers = [
+	{
+	    name: 'Mapbox Basic',
+	    type: 'mapbox',
+	    id: 'basic'
+	},
+	{
+	    name: 'Mapbox Streets',
+	    type: 'mapbox',
+	    id: 'streets'
+	},
+	{
+	    name: 'Mapbox Satellite',
+	    type: 'mapbox',
+	    id: 'satellite'
+	}
+    ];
+
+    var html = "<select class='base-layer-selector' onchange='changeBaseLayer(this)'>";
+    for (var i = 0; i < base_layers.length; i++) {
+	var layer = base_layers[i];
+	html += "<option value='" + layer.id + "' type='" + layer.type + "'>" + layer.name + "</option>";
+    }
+    html += "</select>";
+    //document.getElementById('map').innerHTML = html + document.getElementById('map').innerHTML;
+    document.getElementById('map').insertAdjacentHTML('afterend', html)
+}
+
+function changeBaseLayer(baseLayerSelector) {
+    var option = baseLayerSelector.options[baseLayerSelector.selectedIndex];
+    var type = option.getAttribute('type');
+    var layerId = option.getAttribute('value');
+    //console.log(map.getStyle().layers);
+    //console.log(map.getStyle().sources);
+    var addedSources = map.getStyle().sources;
+    // remove the mapbox source
+    delete addedSources.mapbox;
+    
+    // remove the layers added by mapbox. Now we only have layers that were added by user
+    var addedLayers  = map.getStyle().layers.filter(layer => layer.source != 'mapbox' && layer.id != 'background');
+
+    if (type == 'mapbox'){
+	// user has switched to other mapbox layer
+	// change the mapbox style. This will remove all the layers that were added.
+	map.setStyle('mapbox://styles/mapbox/' + layerId + '-v9')
+
+	map.on('style.load', function() {
+	    // add all sources back
+	    Object.keys(addedSources).forEach(function(source) {
+	        map.addSource(source, addedSources[source]);
+	    });
+
+	    // add all layers back
+	    addedLayers.forEach(function(layer) {
+	        map.addLayer(layer);
+	    });
+	});
+    }
+    console.log(addedLayers);
+    console.log(addedSources);
+    
+
+}
+
+function SyncGoogleAndMapboxglMaps(map, gmap){
     map.on('zoomstart', function(){
         set_initial_zoom(map);
     })
@@ -79,7 +132,6 @@ function initializeMap() {
     map.on('click', function (e) {
         showClickedFeature(e);
     });
-    populateLayerPanel();
 }
 
 function get_host_name(){
@@ -363,7 +415,9 @@ function append_new_style(style){
 
         Object.keys(style.sources).forEach(function(key){
             // if (!map.isSourceLoaded(key))
-		style.sources[key].tiles = [style.sources[key].tiles[0].replace('6792', '8080')];//[baseUrl + "gwc/service/tms/1.0.0/" + getWorkspace() + "/" + style.layers[0].id + "/EPSG%3A900913/{z}/{x}/{y}"];
+		//style.sources[key].tiles = [style.sources[key].tiles[0].replace('6792', '8080')];
+		//[baseUrl + "gwc/service/tms/1.0.0/" + getWorkspace() + "/" + style.layers[0].id + "/EPSG%3A900913/{z}/{x}/{y}"];
+		style.sources[key].tiles = ["http://" + get_host() + "/" + style.sources[key].tiles[0]];
                 map.addSource(key, style.sources[key]);
         })
         style.layers.forEach(function(layer){
@@ -430,7 +484,7 @@ function openTab(evt, div_name) {
     // Get all elements with class="tabcontent" and hide them
     tabcontent = document.getElementsByClassName("tabcontent");
     for (i = 0; i < tabcontent.length; i++) {
-        tabcontent[i].style.display = "none";
+        tabcontent[i].classList.add('hide');
     }
 
     // Get all elements with class="tablinks" and remove the class "active"
@@ -440,7 +494,7 @@ function openTab(evt, div_name) {
     }
 
     // Show the current tab, and add an "active" class to the button that opened the tab
-    document.getElementById(div_name).style.display = "block";
+    document.getElementById(div_name).classList.remove('hide');
     evt.currentTarget.className += " active";
 }
 
@@ -571,7 +625,8 @@ export default {
 }
 
 window.initMap                     =initMap
-window.initializeMap               =initializeMap
+window.initGoogleMap               =initGoogleMap
+window.initMapboxglMap             =initMapboxglMap
 window.get_host_name               =get_host_name
 window.get_port                    =get_port
 window.get_host                    =get_host
@@ -607,6 +662,8 @@ window.clear_selected_feature_tree =clear_selected_feature_tree
 window.update_selected_feature_tree=update_selected_feature_tree
 window.renderJSON                  =renderJSON
 window.toggleAllChildren           =toggleAllChildren
-window.set_initial_zoom=set_initial_zoom
-window.syncMaps        =syncMaps
-window.sync_map_move   =sync_map_move
+window.set_initial_zoom            =set_initial_zoom
+window.syncMaps                    =syncMaps
+window.sync_map_move               =sync_map_move
+window.SyncGoogleAndMapboxglMaps   =SyncGoogleAndMapboxglMaps
+window.changeBaseLayer             =changeBaseLayer
