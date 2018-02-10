@@ -38,3 +38,7 @@ export default {
 	syncMaps: syncMaps,
 	sync_map_move: sync_map_move
 }
+
+window.set_initial_zoom=set_initial_zoom
+window.syncMaps        =syncMaps
+window.sync_map_move   =sync_map_move

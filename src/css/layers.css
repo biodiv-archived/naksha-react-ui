@@ -1,10 +1,17 @@
+.body { 
+	margin:0;
+	padding:0;
+	overflow: hidden
+}
 
 .map {
-	margin:1% 0 0 0;
-	position:absolute;
-	width:100%;
+	/*margin:1% 0 0 0;*/
+	position: absolute;
+	width: 99%;
 	height: 80%;
 	border: black;
+	top: auto !important;
+	bottom: auto !important;
 }
 
 .map canvas {
@@ -26,14 +33,10 @@
 	top: 0;
 	left: 0;
 	width: 30%;
-	/*border: solid;*/
 	background-color: #f1f1f1; 
-	/*border-width: 1px;*/
 	transform: translate(0%, 0px);
 	transition: all 0.5s ease-out;
-
-	overflow-y: scroll;
-	overflow-x: hidden;
+	overflow: hidden;
 }
 
 .border-inside {
@@ -44,6 +47,16 @@
 
 .nav--active {
 	transform: translate(-100%, 0%);
+}
+
+#nav-all-layers {
+	height: 90%;
+	overflow-y: scroll;
+}
+
+#nav-selected-layers {
+	height: 90%;
+	overflow-y: scroll;
 }
 
 .header {
@@ -57,11 +70,12 @@
 }
 
 .layer-name-div {
-	height: 20px;
+	min-height: 20px;
+	height: auto;
 	width: 100%;
 	cursor: pointer;
 	/*background-color: white;*/
-	/*margin: 2% 1% 1% 2%;*/
+	margin: 2% 0% 2% 0%;
 	/*padding: 1% 1% 1% 1%;*/
 }
 
@@ -83,15 +97,14 @@
 	width: 90%;
 	background-color: white;
 	margin: 2% 1% 1% 2%;
-	padding: 1% 2% 2% 2%;
-	border-radius: 2vh;
+	padding: 1% 2% 1% 2%;
+	border-radius: 1vh;
 }
 
 .layer-expanded {
 	height: 85px;
 	width: 100%;
 	display: block;
-	margin: 2% 0 0 0;
 }
 
 .hide {
@@ -99,19 +112,23 @@
 }
 
 .layer-thumb {
-	height: 80px;
-	width: 80px;
-	/*background-color: grey;*/
+	height: 95%;
+	width: 25%;
 	border: solid;
 	border-width: 1px;
 	float: left;
 }
 
+
 .layer-desc {
 	height: 40px;
 	width: 70%;
-	border: solid;
+	/*border: solid;*/
 	float: right;
+	font-size: 12px;
+	padding: 1%;
+	overflow-y: auto;
+	margin: 0% 0% 2% 0%;
 }
 
 .add-layer-button {
@@ -170,4 +187,81 @@
 	margin: 0 0 0 5%;
 	font-size: 1.5vh;
 	color: blue;
+}
+
+/*-----------------------------------------------------------------------------------*/
+/*Slider bar*/
+
+.slidecontainer {
+    width: 38%; /* Width of the outside container */
+    float: left;
+}
+
+.slidercontainer input {
+	width: 100%;
+}
+
+/* The slider itself */
+.slider {
+	border-radius: 10px;
+    -webkit-appearance: none;  /* Override default CSS styles */
+    appearance: none;
+    width: 100%;  /*Full-width */
+    height: 15px; /* Specified height */
+    /*background: #d3d3d3;*/ /* Grey background */
+    outline: none; /* Remove outline */
+    opacity: 0.7; /* Set transparency (for mouse-over effects on hover) */
+    -webkit-transition: .2s; /* 0.2 seconds transition on hover */
+    transition: opacity .2s;
+    padding: 0;
+	margin: 2% 0 0 0;
+}
+
+/* Mouse-over effects */
+.slider:hover {
+    opacity: 1; /* Fully shown on mouse-over */
+}
+
+/* The slider handle (use -webkit- (Chrome, Opera, Safari, Edge) and -moz- (Firefox) to override default look) */
+.slider::-webkit-slider-thumb {
+    -webkit-appearance: none; /* Override default look */
+    appearance: none;
+    width: 15px; /* Set a specific slider handle width */
+    height: 15px; /* Slider handle height */
+    border-radius: 50%; 
+    background: #f1f1f1; /* Green background */
+    cursor: pointer; /* Cursor on hover */
+}
+
+.slider::-moz-range-thumb {
+    width: 15px; /* Set a specific slider handle width */
+    height: 15px; /* Slider handle height */
+    border-radius: 50%; 
+    background: #f1f1f1; /* Green background */
+    cursor: pointer; /* Cursor on hover */
+}
+
+/*-----------------------------------------------------------------------------------*/
+
+.zoom-to-extent-div {
+    background-repeat: no-repeat;
+    background-position: left center;
+    cursor: pointer;
+    opacity: 0.5;
+    margin: 0% 0 0 1%;
+    padding: 0% 4% 0 6%;
+    float: left;
+    border-right: solid 1px;
+    font-size: 14px;
+}
+
+.inline {
+	display: inline;
+}
+
+.base-layer-selector {
+	position: relative;
+	float: right;
+    	margin: 1% 4% 0 0;
+    	height: 2em;
 }
