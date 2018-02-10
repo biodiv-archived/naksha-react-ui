@@ -163,7 +163,7 @@ class MapData extends Component {
     data = data[Object.keys(data)[0]].buckets;
 
     let geojson = level === -1 ? Geohash(data) : GeohashAggr(data, level);
-    let stops = LegendStops(this.props.color_scheme, this.props.legend_stops, geojson.max_count);
+    let stops = LegendStops(this.props.color_scheme, this.props.legend_stops, this.props.no_legend_stops, geojson.max_count);
     this.updateArea(geojson.geojson);
 
     this.setState({

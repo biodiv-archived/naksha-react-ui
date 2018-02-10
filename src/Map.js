@@ -94,7 +94,8 @@ class Map extends Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    this.applyMapData();
+    if(nextProps.data)
+      this.applyMapData();
   }
 
   render() {

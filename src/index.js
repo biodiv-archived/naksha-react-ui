@@ -15,9 +15,11 @@ import Layers from './layer-maps/Layers';
 //                            restrict_to_bounds={[[42, 4], [117, 39]]}
 //                            url_response_geohash_field="document"
 //                            url_response_filtered_geohash_field="document"
-//                            color_scheme="YlOrRd"
-//                            legend_stops="9"
-//                            on_click={function}
+//                            color_scheme="YlOrBr"
+//                            no_legend_stops="7"
+//                            legend_stops={[0.0, 0.00025, .001, .01, .1, .38875, .5]}
+//                            on_click = {function} />,
+//
 //                            document.getElementById('root'));
 
 export default {
