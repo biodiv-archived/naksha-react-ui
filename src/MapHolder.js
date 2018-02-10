@@ -20,9 +20,11 @@ class MapHolder extends Component {
         container: this.props.map_container,
         style: style,
         center: [79, 21],
-        hash: true,
-        maxBounds: this.props.restrict_to_bounds
+        hash: true
       });
+
+      map.fitBounds(this.props.restrict_to_bounds, {linear: true, duration: 0});
+      map.setMaxBounds(map.getBounds());
 
       var nav = new mapboxgl.NavigationControl();
       map.addControl(nav, 'top-right');
@@ -36,8 +38,10 @@ class MapHolder extends Component {
         },trackUserLocation: true});
       map.addControl(location);
 
+      let default_zoom = map.getZoom();
       this.setState({
-        map : map
+        map : map,
+        default_zoom : default_zoom
       });
     }
   }
@@ -48,7 +52,7 @@ class MapHolder extends Component {
           <MapData
             url = {this.props.url}
             location_field = {this.props.location_field}
-            default_zoom = {this.props.default_zoom}
+            default_zoom = {this.state.default_zoom}
             url_response_geohash_field={this.props.url_response_geohash_field}
             url_response_filtered_geohash_field={this.props.url_response_filtered_geohash_field}
             color_scheme = {this.props.color_scheme}

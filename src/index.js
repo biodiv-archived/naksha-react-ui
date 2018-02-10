@@ -10,15 +10,14 @@ import Layers from './layer-maps/Layers';
 //
 // ReactDOM.render(<MapHolder url="http://localhost:8080/naksha/services/geohash-aggregation/observation/observations"
 //                            location_field="location"
-//                            default_zoom="3"
 //                            map_container="map"
-//                            restrict_to_bounds={[[42, 4], [117, 39]]}
+//                            restrict_to_bounds={[[68, 5.75], [98, 37.5]]}
 //                            url_response_geohash_field="document"
 //                            url_response_filtered_geohash_field="document"
 //                            color_scheme="YlOrBr"
 //                            no_legend_stops="7"
 //                            legend_stops={[0.0, 0.00025, .001, .01, .1, .38875, .5]}
-//                            on_click = {function} />,
+//                            on_click={function} />,
 //
 //                            document.getElementById('root'));
 
