@@ -1,14 +1,9 @@
 var mapboxgl = require('mapbox-gl')
 var GoogleMapsLoader = require('google-maps')
-//var sync = require('./sync.js')
-//var set_initial_zoom = sync.set_initial_zoom
-//var syncMaps = sync.syncMaps
-//var sync_map_move = sync.sync_map_move
 
 var baseUrl = "http://" + get_host() + "/naksha/geoserver/"
 var workspace_name = 'biodiv'
-var style_file_json_url = "http://localhost:6792/geoserver/styles/"
-var icons_url = "http://localhost:6792/geoserver/www/icons/"
+var icons_url = "http://localhost:8080/geoserver/www/icons/"
 
 var current_selected_layer = null;
 var current_selected_style = null;
@@ -86,36 +81,31 @@ function changeBaseLayer(baseLayerSelector) {
     var option = baseLayerSelector.options[baseLayerSelector.selectedIndex];
     var type = option.getAttribute('type');
     var layerId = option.getAttribute('value');
-    //console.log(map.getStyle().layers);
-    //console.log(map.getStyle().sources);
+
     var addedSources = map.getStyle().sources;
     // remove the mapbox source
     delete addedSources.mapbox;
     
     // remove the layers added by mapbox. Now we only have layers that were added by user
-    var addedLayers  = map.getStyle().layers.filter(layer => layer.source != 'mapbox' && layer.id != 'background');
+    var addedLayers  = map.getStyle().layers.filter(layer => layer.source != 'mapbox' && layer.source!='world' && layer.id != 'background');
 
     if (type == 'mapbox'){
 	// user has switched to other mapbox layer
 	// change the mapbox style. This will remove all the layers that were added.
 	map.setStyle('mapbox://styles/mapbox/' + layerId + '-v9')
-
-	map.on('style.load', function() {
-	    // add all sources back
-	    Object.keys(addedSources).forEach(function(source) {
-	        map.addSource(source, addedSources[source]);
-	    });
-
-	    // add all layers back
-	    addedLayers.forEach(function(layer) {
-	        map.addLayer(layer);
-	    });
-	});
     }
-    console.log(addedLayers);
-    console.log(addedSources);
-    
 
+    map.on('style.load', function() {
+	// add all sources back
+	Object.keys(addedSources).forEach(function(source) {
+	    map.addSource(source, addedSources[source]);
+	});
+
+	// add all layers back
+	addedLayers.forEach(function(layer) {
+	    map.addLayer(layer);
+	});
+    });
 }
 
 function SyncGoogleAndMapboxglMaps(map, gmap){
@@ -360,6 +350,20 @@ function expand_layer_details(layer_id) {
     var expanded_div_id = layer_id + "_expanded";
     var div = document.getElementById(expanded_div_id);
     div.classList.toggle('hide');
+
+    // On first time opening, fetch the thumbnail and show
+    var thumb_div = div.getElementsByClassName('layer-thumb')[0];
+    console.log('id', expanded_div_id);
+    console.log(baseUrl + layer_id + '_thumb.gif')
+    console.log('children', thumb_div.children)
+    if (thumb_div.children.length == 0){
+        console.log('thumb', layer_id);
+	//uncomment following to get thumbnails through naksha
+	//thumb_div.insertAdjacentHTML('afterbegin', "<img src=" + baseUrl + "thumbnails/" + layer_id +"_thumb.gif></img>")
+
+	//uncomment following to get thumbnails directly from geoserver
+	thumb_div.insertAdjacentHTML('afterbegin', "<img src=http://" + get_host() + "/geoserver/www/map_thumbnails/" + layer_id +"_thumb.gif></img>")
+    }
 }
 
 function populateLayerPanel() {
@@ -373,11 +377,9 @@ function populateLayerPanel() {
             "<div class='layer-div no-select'>"
                 +"<div id="+layer.name+" class='layer-name-div no-select' onclick='expand_layer_details(this.id)'>" + layer.title + "</div>"
                 +"<div id="+layer.name+"_expanded class='layer-expanded hide'>"
-                    +"<div class='layer-thumb'>"
-                    // +"<img src="+map_thumbnails_url + layer.name +"_thumb.gif></img>"
-                    +"</div>"
+                    +"<div class='layer-thumb'></div>"
                     +"<div class='layer-desc'>"+layer.abstract+"</div>"
-                    +"<i id=add_"+layer.name+"_button class='fa fa-plus-circle float-right pointer' onclick='add_layer_to_map(\""+layer.name+"\",\""+layer.title+"\")' style='font-size:36px;color:green;'></i>"
+                    +"<i id=add_"+layer.name+"_button class='fa fa-plus-circle float-right pointer' onclick='add_layer_to_map(\""+layer.name+"\",\""+layer.title+"\",\""+layer.bbox+"\")' style='font-size:36px;color:green;'></i>"
                     +"<i id=rem_"+layer.name+"_button class='fa fa-minus-circle float-right pointer hide' onclick='remove_layer_from_map(\""+layer.name+"\")' style='font-size:36px;color:red;'></i>"
                 +"</div>"
             +"</div>"
@@ -389,7 +391,7 @@ function toggleSideBar(){
     document.getElementById("nav").classList.toggle("nav--active");
 }
 
-function add_layer_to_map(layerName, layerTitle){
+function add_layer_to_map(layerName, layerTitle, layerBbox){
 
     if(active_layers.indexOf(layerName) != -1){
         // layer is already active
@@ -400,7 +402,7 @@ function add_layer_to_map(layerName, layerTitle){
     var default_style = all_styles[0];
     var style = getStyle(default_style);
     append_new_style(style);
-    addLayerToSelectedTab(layerName, layerTitle, all_styles, style)
+    addLayerToSelectedTab(layerName, layerTitle, layerBbox, all_styles, style)
     document.getElementById("add_" + layerName + "_button").classList.toggle('hide');
     document.getElementById("rem_" + layerName + "_button").classList.toggle('hide');
     active_layers.push(layerName);
@@ -426,12 +428,23 @@ function append_new_style(style){
     // }
 }
 
-function addLayerToSelectedTab(layerName, layerTitle, all_styles, style){
+function zoomToExtent(Bbox) {
+    var coord = Bbox.split(',');
+    var minx = Number(coord[0]);
+    var miny = Number(coord[1]);
+    var maxx = Number(coord[2]);
+    var maxy = Number(coord[3]);
+    //console.log(minx, miny, maxx, maxy);
+    //console.log(minx+miny);
+    map.fitBounds([[minx, miny],[maxx, maxy]]);
+}
+
+function addLayerToSelectedTab(layerName, layerTitle, layerBbox, all_styles, style){
     var selectedLayersPanel = document.getElementById('nav-selected-layers');
     var html = selectedLayersPanel.innerHTML;
     html +=  "<div id="+layerName+"_styler class='layer-div no-select'>"
             +   "<div class='layer-name-div no-select'>" + layerTitle + "</div>\n"
-            +   "<div class='zoom-to-extent-div inline' style='background-image:url("+icons_url+"zoom-to-extent.png)'>"
+            +   "<div class='zoom-to-extent-div inline' style='background-image:url("+icons_url+"zoom-to-extent.png)' onclick='zoomToExtent(\""+layerBbox+"\")'>"
             // +   "<img src="+icons_url+"zoom-to-extent.png style='margin: 0 4% 0 0;'></img>"
             +   "zoom to extent"
             +   "</div>"
@@ -667,3 +680,4 @@ window.syncMaps                    =syncMaps
 window.sync_map_move               =sync_map_move
 window.SyncGoogleAndMapboxglMaps   =SyncGoogleAndMapboxglMaps
 window.changeBaseLayer             =changeBaseLayer
+window.zoomToExtent                =zoomToExtent
