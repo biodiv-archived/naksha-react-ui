@@ -100,7 +100,7 @@
 }
 
 .layer-div {
-	width: 90%;
+	width: 97%;
 	background-color: white;
 	margin: 2% 1% 1% 2%;
 	padding: 1% 2% 1% 2%;
@@ -199,7 +199,7 @@
 /*Slider bar*/
 
 .slidecontainer {
-    width: 38%; /* Width of the outside container */
+    width: 32%; /* Width of the outside container */
     float: left;
     margin: 2% 0 0 0;
 }
@@ -260,6 +260,7 @@
     float: left;
     border-right: solid 1px;
     font-size: 14px;
+    width: 41%;
 }
 
 .inline {

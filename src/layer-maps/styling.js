@@ -456,7 +456,7 @@ function addLayerToSelectedTab(layerName, layerTitle, layerBbox, all_styles, sty
             +   "<div class='slidecontainer inline'>"
             +       "<input id="+layerName+"_slider class='slider' type='range' min='1' max='100' step='5' value="+getOpacity(style)+" onchange='setOpacity(\""+layerName+"\",\""+layerType+"\", this.value)' oninput='setOpacity(\""+layerName+"\",\""+layerType+"\", this.value)'></input>"
             +   "</div>"
-            +   "<div style='font-size:14px; padding-top: 7%;'>Style map by: "
+            +   "<div style='font-size:14px; padding-top: 7%;'>Style by: "
             +       "<select class='style-selector' onchange='changeLayerStyle(\""+layerName+"\",this)'>"
             +           styleSelectorHTML
             +       "</select>"
