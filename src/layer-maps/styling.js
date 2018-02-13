@@ -14,12 +14,12 @@ var active_layers = [];
 var initial_zoom = null;
 
 var map = null;
-var gmap = null;
+// var gmap = null;
 
 function initMap() {
     var india_center = {lat: 25, lng: 77};
     var zoom = 4;
-    var gZoom = zoom + 1; // Google zoom levels are one higher than mapboxgl
+    // var gZoom = zoom + 1; // Google zoom levels are one higher than mapboxgl
     initMapboxglMap(india_center, zoom);
     // initGoogleMap(india_center, gZoom);
     // SyncGoogleAndMapboxglMaps(map, gmap);
@@ -28,7 +28,7 @@ function initMap() {
 
 function initGoogleMap(center, zoom) {
     GoogleMapsLoader.load(function(google) {
-        gmap = new google.maps.Map(document.getElementById('gmap'), {
+        new google.maps.Map(document.getElementById('gmap'), {
         zoom: zoom,
         center: center
       });
@@ -85,11 +85,11 @@ function changeBaseLayer(baseLayerSelector) {
     var addedSources = map.getStyle().sources;
     // remove the mapbox source
     delete addedSources.mapbox;
-    
-    // remove the layers added by mapbox. Now we only have layers that were added by user
-    var addedLayers  = map.getStyle().layers.filter(layer => layer.source != 'mapbox' && layer.source!='world' && layer.id != 'background');
 
-    if (type == 'mapbox'){
+    // remove the layers added by mapbox. Now we only have layers that were added by user
+    var addedLayers  = map.getStyle().layers.filter(layer => layer.source !== 'mapbox' && layer.source !== 'world' && layer.id !== 'background');
+
+    if (type === 'mapbox'){
 	// user has switched to other mapbox layer
 	// change the mapbox style. This will remove all the layers that were added.
 	map.setStyle('mapbox://styles/mapbox/' + layerId + '-v9')
@@ -270,7 +270,7 @@ function getLatLonBBoxString(boundingBoxElement) {
 
 function layer_changed(){
     var new_layer = document.getElementById('layer_input').value;
-    if (new_layer == current_selected_layer)
+    if (new_layer === current_selected_layer)
         // nothing has changed
         return;
 
@@ -296,7 +296,7 @@ function layer_changed(){
 
 function style_changed(){
     var new_style = document.getElementById('style_input').value;
-    if (new_style == current_selected_style)
+    if (new_style === current_selected_style)
         // nothing has changed
         return;
 
@@ -338,9 +338,9 @@ function getThemeNames(theme_type) {
 
     var by_geography = 'India///Nilgiri Biosphere Reserve///Western Ghats///BR Hills, Karnataka///Vembanad, Kerala///Bandipur, Karnataka';
 
-    if (theme_type == 1)
+    if (theme_type === 1)
     return by_themes.split('///');
-    else if (theme_type == 2)
+    else if (theme_type === 2)
     return by_geography.split('///');
 }
 
@@ -354,7 +354,7 @@ function expand_layer_details(layer_id) {
     console.log('id', expanded_div_id);
     console.log(baseUrl + layer_id + '_thumb.gif')
     console.log('children', thumb_div.children)
-    if (thumb_div.children.length == 0){
+    if (thumb_div.children.length === 0){
         console.log('thumb', layer_id);
 	//uncomment following to get thumbnails through naksha
 	thumb_div.insertAdjacentHTML('afterbegin', "<img src=" + baseUrl + "thumbnails/" + layer_id + "_thumb.gif></img>")
@@ -391,7 +391,7 @@ function toggleSideBar(){
 
 function add_layer_to_map(layerName, layerTitle, layerBbox){
 
-    if(active_layers.indexOf(layerName) != -1){
+    if(active_layers.indexOf(layerName) !== -1){
         // layer is already active
         alert("Layer " + layerName + " is already added to map");
         return;
@@ -470,16 +470,16 @@ function changeLayerStyle(layerName, layerStyleSelector) {
     var selectedStyle = option.getAttribute('value');
     map.removeLayer(layerName);
     map.removeSource(layerName);
-    append_new_style(getStyle(selectedStyle)); 
+    append_new_style(getStyle(selectedStyle));
 }
 
 function setOpacity(layerName, layerType, opacity) {
     console.log(layerName, layerType, opacity);
-    if (map.getLayer(layerName) == undefined)
+    if (map.getLayer(layerName) === undefined)
 	return;
-    if (layerType == 'fill')
+    if (layerType === 'fill')
 	map.setPaintProperty(layerName, 'fill-opacity', opacity/100);
-    else if (layerType == 'circle')
+    else if (layerType === 'circle')
 	map.setPaintProperty(layerName, 'circle-opacity', opacity/100);
 }
 
@@ -493,7 +493,7 @@ function getOpacity(style){
 }
 
 function remove_layer_from_map(layer_name){
-    if (active_layers.indexOf(layer_name) == -1){
+    if (active_layers.indexOf(layer_name) === -1){
         alert("Layer " + layer_name + " is not present on the map");
     }
     console.log("Removing source " + layer_name)
@@ -556,7 +556,7 @@ function hightlight_selected_feature(features) {
             },
             'filter': ['in', '__mlocate__id', feature.properties.__mlocate__id]
         })
-        if (active_layers.indexOf(layer+'-highlighted') == -1)
+        if (active_layers.indexOf(layer+'-highlighted') === -1)
             active_layers.push(layer+'-highlighted');
     }
 }
@@ -566,9 +566,9 @@ function clear_selected_features() {
 }
 
 function get_style_by(feature) {
-    if (feature.layer.type == "fill")
+    if (feature.layer.type === "fill")
         return feature.layer.paint['fill-color'].property;
-    else if (feature.layer.type == "circle")
+    else if (feature.layer.type === "circle")
         return feature.layer.paint['circle-color'].property;
     else
         return null;
@@ -588,7 +588,6 @@ function update_selected_feature_tree(features) {
 }
 
 function renderJSON(obj) {
-    'use strict';
     var keys = [],
         retValue = "";
     for (var key in obj) {
