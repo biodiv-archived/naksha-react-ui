@@ -3,7 +3,7 @@ var GoogleMapsLoader = require('google-maps')
 
 var baseUrl = "http://" + get_host() + "/naksha/geoserver/"
 var workspace_name = 'biodiv'
-var icons_url = "http://localhost:8080/geoserver/www/icons/"
+var thumbnailsUrl = baseUrl + "thumbnails/";
 
 var current_selected_layer = null;
 var current_selected_style = null;
@@ -357,7 +357,7 @@ function expand_layer_details(layer_id) {
     if (thumb_div.children.length === 0){
         console.log('thumb', layer_id);
 	//uncomment following to get thumbnails through naksha
-	thumb_div.insertAdjacentHTML('afterbegin', "<img src=" + baseUrl + "thumbnails/" + layer_id + "_thumb.gif></img>")
+	thumb_div.insertAdjacentHTML('afterbegin', "<img src=" + thumbnailsUrl + layer_id + "_thumb.gif></img>")
 
 	//uncomment following to get thumbnails directly from geoserver
 	//thumb_div.insertAdjacentHTML('afterbegin', "<img src=http://" + get_host() + "/geoserver/www/map_thumbnails/" + layer_id +"_thumb.gif></img>")
@@ -387,6 +387,7 @@ function populateLayerPanel() {
 
 function toggleSideBar(){
     document.getElementById("nav").classList.toggle("nav--active");
+    document.getElementsByClassName('hamburger')[0].classList.toggle("is-active");
 }
 
 function add_layer_to_map(layerName, layerTitle, layerBbox){
@@ -447,7 +448,7 @@ function addLayerToSelectedTab(layerName, layerTitle, layerBbox, all_styles, sty
     })
     html +=  "<div id="+layerName+"_styler class='layer-div no-select'>"
             +   "<div class='layer-name-div no-select'>" + layerTitle + "</div>\n"
-            +   "<div class='zoom-to-extent-div inline' style='background-image:url("+icons_url+"zoom-to-extent.png)' onclick='zoomToExtent(\""+layerBbox+"\")'>"
+            +   "<div class='zoom-to-extent-div inline' style='background-image:url("+thumbnailsUrl+"zoom-to-extent.png)' onclick='zoomToExtent(\""+layerBbox+"\")'>"
             // +   "<img src="+icons_url+"zoom-to-extent.png style='margin: 0 4% 0 0;'></img>"
             +   "zoom to extent"
             +   "</div>"
