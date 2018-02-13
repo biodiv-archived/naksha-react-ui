@@ -120,7 +120,7 @@ function SyncGoogleAndMapboxglMaps(map, gmap){
     })
 
     map.on('click', function (e) {
-        showClickedFeature(e);
+        //showClickedFeature(e);
     });
 }
 
@@ -158,12 +158,10 @@ function getStyle(style_name){
 
 // gets all available styles for a layer
 function getAvailableStyles(layer){
-    var style_file_url = baseUrl + "layers/" + layer + "/styles"
-    var styles = httpGetAsync(style_file_url);
-    var styles_json = JSON.parse(styles);
-
-    var all_styles = styles_json.styles.style.map(feature => feature.name);
-    return all_styles;
+    var styleFileUrl = baseUrl + "layers/" + layer + "/styles"
+    var styles = httpGetAsync(styleFileUrl);
+    var stylesJson = JSON.parse(styles);
+    return stylesJson;
 }
 
 function httpGetAsync(theUrl, isXML=false)
@@ -359,7 +357,7 @@ function expand_layer_details(layer_id) {
     if (thumb_div.children.length == 0){
         console.log('thumb', layer_id);
 	//uncomment following to get thumbnails through naksha
-	thumb_div.insertAdjacentHTML('afterbegin', "<img src=" + baseUrl + "thumbnails/" + layer_id +"_thumb.gif></img>")
+	thumb_div.insertAdjacentHTML('afterbegin', "<img src=" + baseUrl + "thumbnails/" + layer_id + "_thumb.gif></img>")
 
 	//uncomment following to get thumbnails directly from geoserver
 	//thumb_div.insertAdjacentHTML('afterbegin', "<img src=http://" + get_host() + "/geoserver/www/map_thumbnails/" + layer_id +"_thumb.gif></img>")
@@ -398,11 +396,11 @@ function add_layer_to_map(layerName, layerTitle, layerBbox){
         alert("Layer " + layerName + " is already added to map");
         return;
     }
-    var all_styles = getAvailableStyles(layerName)
-    var default_style = all_styles[0];
-    var style = getStyle(default_style);
+    var allStyles = getAvailableStyles(layerName)
+    var defaultStyle = allStyles.splice(0, 1)[0];
+    var style = getStyle(defaultStyle.styleName);
     append_new_style(style);
-    addLayerToSelectedTab(layerName, layerTitle, layerBbox, all_styles, style)
+    addLayerToSelectedTab(layerName, layerTitle, layerBbox, allStyles, style)
     document.getElementById("add_" + layerName + "_button").classList.toggle('hide');
     document.getElementById("rem_" + layerName + "_button").classList.toggle('hide');
     active_layers.push(layerName);
@@ -418,8 +416,8 @@ function append_new_style(style){
         Object.keys(style.sources).forEach(function(key){
             // if (!map.isSourceLoaded(key))
 		//style.sources[key].tiles = [style.sources[key].tiles[0].replace('6792', '8080')];
-		//[baseUrl + "gwc/service/tms/1.0.0/" + getWorkspace() + "/" + style.layers[0].id + "/EPSG%3A900913/{z}/{x}/{y}"];
-		style.sources[key].tiles = ["http://" + get_host() + "/" + style.sources[key].tiles[0]];
+		style.sources[key].tiles = [baseUrl + "gwc/service/tms/1.0.0/" + getWorkspace() + ":" + style.layers[0].id + "/{z}/{x}/{y}"];
+		//style.sources[key].tiles = ["http://" + get_host() + "/" + style.sources[key].tiles[0]];
                 map.addSource(key, style.sources[key]);
         })
         style.layers.forEach(function(layer){
@@ -443,6 +441,10 @@ function addLayerToSelectedTab(layerName, layerTitle, layerBbox, all_styles, sty
     var selectedLayersPanel = document.getElementById('nav-selected-layers');
     var html = selectedLayersPanel.innerHTML;
     var layerType = style.layers[0].type; //circle or fill
+    var styleSelectorHTML = ""
+    all_styles.forEach(function(style){
+	styleSelectorHTML += "<option value=" + style.styleName + ">" + style.styleTitle + "</option>";
+    })
     html +=  "<div id="+layerName+"_styler class='layer-div no-select'>"
             +   "<div class='layer-name-div no-select'>" + layerTitle + "</div>\n"
             +   "<div class='zoom-to-extent-div inline' style='background-image:url("+icons_url+"zoom-to-extent.png)' onclick='zoomToExtent(\""+layerBbox+"\")'>"
@@ -454,13 +456,21 @@ function addLayerToSelectedTab(layerName, layerTitle, layerBbox, all_styles, sty
             +       "<input id="+layerName+"_slider class='slider' type='range' min='1' max='100' step='5' value="+getOpacity(style)+" onchange='setOpacity(\""+layerName+"\",\""+layerType+"\", this.value)' oninput='setOpacity(\""+layerName+"\",\""+layerType+"\", this.value)'></input>"
             +   "</div>"
             +   "<div style='font-size:14px; padding-top: 7%;'>Style map by: "
-            +       "<select class='style-selector'>"
-            +           all_styles
+            +       "<select class='style-selector' onchange='changeLayerStyle(\""+layerName+"\",this)'>"
+            +           styleSelectorHTML
             +       "</select>"
             +   "</div>"
             +"</div>"
 
     selectedLayersPanel.innerHTML = html;
+}
+
+function changeLayerStyle(layerName, layerStyleSelector) {
+    var option = layerStyleSelector.options[layerStyleSelector.selectedIndex];
+    var selectedStyle = option.getAttribute('value');
+    map.removeLayer(layerName);
+    map.removeSource(layerName);
+    append_new_style(getStyle(selectedStyle)); 
 }
 
 function setOpacity(layerName, layerType, opacity) {
@@ -488,15 +498,15 @@ function remove_layer_from_map(layer_name){
     }
     console.log("Removing source " + layer_name)
     // map.isSourceLoaded(layer_name);
-    if (map.getLayer(layer_name+'-highlighted') != undefined)
-        map.removeLayer(layer_name+'-highlighted');
+    //if (map.getLayer(layer_name+'-highlighted') != undefined)
+    //    map.removeLayer(layer_name+'-highlighted');
     map.removeLayer(layer_name);
-    // map.removeSource(layer_name);
+    map.removeSource(layer_name);
     document.getElementById("add_" + layer_name + "_button").classList.toggle('hide');
     document.getElementById("rem_" + layer_name + "_button").classList.toggle('hide');
     console.log(active_layers);
     active_layers.splice(layer_name, 1);
-    active_layers.splice(layer_name+'-highlighted', 1);
+    //active_layers.splice(layer_name+'-highlighted', 1);
     console.log(active_layers);
     console.log(map)
 }
@@ -693,3 +703,4 @@ window.SyncGoogleAndMapboxglMaps   =SyncGoogleAndMapboxglMaps
 window.changeBaseLayer             =changeBaseLayer
 window.zoomToExtent                =zoomToExtent
 window.setOpacity                  =setOpacity
+window.changeLayerStyle            =changeLayerStyle
