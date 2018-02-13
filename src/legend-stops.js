@@ -27,8 +27,18 @@ module.exports = function(color_scheme, is_legend_stops_data_driven, no_stops, c
     return stops;
   }
 
+  let pre_stop = 1
   for (let i = 1; i < no_stops; i++) {
     let stop = counts[interval * i];
+
+    if(stop <= pre_stop) {
+      let index = interval*i;
+      while(index < counts.length && counts[index++] <= pre_stop);
+      if(index === counts.length) return stops;
+      stop = counts[index];
+    }
+
+    pre_stop = stop;
     stops.push([stop, cb[color_scheme][no_stops][i]]);
   }
 
