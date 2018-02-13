@@ -442,6 +442,7 @@ function zoomToExtent(Bbox) {
 function addLayerToSelectedTab(layerName, layerTitle, layerBbox, all_styles, style){
     var selectedLayersPanel = document.getElementById('nav-selected-layers');
     var html = selectedLayersPanel.innerHTML;
+    var layerType = style.layers[0].type; //circle or fill
     html +=  "<div id="+layerName+"_styler class='layer-div no-select'>"
             +   "<div class='layer-name-div no-select'>" + layerTitle + "</div>\n"
             +   "<div class='zoom-to-extent-div inline' style='background-image:url("+icons_url+"zoom-to-extent.png)' onclick='zoomToExtent(\""+layerBbox+"\")'>"
@@ -450,7 +451,7 @@ function addLayerToSelectedTab(layerName, layerTitle, layerBbox, all_styles, sty
             +   "</div>"
             +   "<div style='width: 18%;float: left;font-size: 14px;opacity: 0.5;margin: 0 0 0 3%;'>opacity</div>"
             +   "<div class='slidecontainer inline'>"
-            +       "<input id="+layerName+"_slider class='slider' type='range' min='1' max='100' step='5' value="+getOpacity(style)+"></input>"
+            +       "<input id="+layerName+"_slider class='slider' type='range' min='1' max='100' step='5' value="+getOpacity(style)+" onchange='setOpacity(\""+layerName+"\",\""+layerType+"\", this.value)' oninput='setOpacity(\""+layerName+"\",\""+layerType+"\", this.value)'></input>"
             +   "</div>"
             +   "<div style='font-size:14px; padding-top: 7%;'>Style map by: "
             +       "<select class='style-selector'>"
@@ -460,6 +461,16 @@ function addLayerToSelectedTab(layerName, layerTitle, layerBbox, all_styles, sty
             +"</div>"
 
     selectedLayersPanel.innerHTML = html;
+}
+
+function setOpacity(layerName, layerType, opacity) {
+    console.log(layerName, layerType, opacity);
+    if (map.getLayer(layerName) == undefined)
+	return;
+    if (layerType == 'fill')
+	map.setPaintProperty(layerName, 'fill-opacity', opacity/100);
+    else if (layerType == 'circle')
+	map.setPaintProperty(layerName, 'circle-opacity', opacity/100);
 }
 
 function getOpacity(style){
@@ -681,3 +692,4 @@ window.sync_map_move               =sync_map_move
 window.SyncGoogleAndMapboxglMaps   =SyncGoogleAndMapboxglMaps
 window.changeBaseLayer             =changeBaseLayer
 window.zoomToExtent                =zoomToExtent
+window.setOpacity                  =setOpacity
