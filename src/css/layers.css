@@ -195,6 +195,7 @@
 .slidecontainer {
     width: 38%; /* Width of the outside container */
     float: left;
+    margin: 2% 0 0 0;
 }
 
 .slidercontainer input {
@@ -207,10 +208,10 @@
     -webkit-appearance: none;  /* Override default CSS styles */
     appearance: none;
     width: 100%;  /*Full-width */
-    height: 15px; /* Specified height */
-    /*background: #d3d3d3;*/ /* Grey background */
+    height: 0.2em; /* Specified height */
+    background: #d3d3d3; /* Grey background */
     outline: none; /* Remove outline */
-    opacity: 0.7; /* Set transparency (for mouse-over effects on hover) */
+    /*opacity: 0.7;*/ /* Set transparency (for mouse-over effects on hover) */
     -webkit-transition: .2s; /* 0.2 seconds transition on hover */
     transition: opacity .2s;
     padding: 0;
@@ -261,6 +262,7 @@
 
 .base-layer-selector {
 	position: relative;
+	z-index: 100; /* This should always be higher than mapbox-gl map canvas*/
 	float: right;
     	margin: 1% 4% 0 0;
     	height: 2em;
