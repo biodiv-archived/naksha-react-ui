@@ -359,10 +359,10 @@ function expand_layer_details(layer_id) {
     if (thumb_div.children.length == 0){
         console.log('thumb', layer_id);
 	//uncomment following to get thumbnails through naksha
-	//thumb_div.insertAdjacentHTML('afterbegin', "<img src=" + baseUrl + "thumbnails/" + layer_id +"_thumb.gif></img>")
+	thumb_div.insertAdjacentHTML('afterbegin', "<img src=" + baseUrl + "thumbnails/" + layer_id +"_thumb.gif></img>")
 
 	//uncomment following to get thumbnails directly from geoserver
-	thumb_div.insertAdjacentHTML('afterbegin', "<img src=http://" + get_host() + "/geoserver/www/map_thumbnails/" + layer_id +"_thumb.gif></img>")
+	//thumb_div.insertAdjacentHTML('afterbegin', "<img src=http://" + get_host() + "/geoserver/www/map_thumbnails/" + layer_id +"_thumb.gif></img>")
     }
 }
 
