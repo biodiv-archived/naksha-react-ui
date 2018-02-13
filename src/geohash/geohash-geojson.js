@@ -6,9 +6,7 @@ module.exports = function(data) {
     "type": "FeatureCollection",
     features: []
   };
-
-  var max_count = 0;
-  var min_count = 1000000000;
+  var counts = [];
 
   for (var i = 0; i < data.length; i++) {
     var bbox = GeoHash.GeoHash.decodeGeoHash(data[i].key);
@@ -28,14 +26,13 @@ module.exports = function(data) {
     };
 
     geojson.features.push(feature);
-
-    max_count = Math.max(max_count, count);
-    min_count = Math.min(min_count, count);
+    counts.push(count);
   }
+
+  counts.sort(function(a, b){return a-b});
 
   return {
     geojson: geojson,
-    max_count: max_count,
-    min_count: min_count
+    counts: counts
   };
 };

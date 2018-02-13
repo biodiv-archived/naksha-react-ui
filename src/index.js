@@ -16,7 +16,7 @@ import Layers from './layer-maps/Layers';
 //                            url_response_filtered_geohash_field="document"
 //                            color_scheme="YlOrBr"
 //                            no_legend_stops="7"
-//                            legend_stops={[0.0, 0.00025, .001, .01, .1, .38875, .5]}
+//                            is_legend_stops_data_driven={true}
 //                            on_click={function} />,
 //
 //                            document.getElementById('root'));

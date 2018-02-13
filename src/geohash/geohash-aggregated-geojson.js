@@ -7,17 +7,14 @@ module.exports = function(data, level) {
   if (data.length === 0)
     return {
       geojson: [],
-      min_count: 0,
-      max_count: 0
+      counts: []
     };
 
   var geojson = {
     "type": "FeatureCollection",
     features: []
   };
-
-  var max_count = 0;
-  var min_count = 1000000000;
+  var counts = []
 
   var count_map = new Map()
   var bin_map = new Map()
@@ -53,15 +50,13 @@ module.exports = function(data, level) {
     };
 
     geojson.features.push(feature);
-
-    max_count = Math.max(max_count, value);
-    min_count = Math.min(min_count, value);
-
+    counts.push(value);
   }
+
+  counts.sort(function(a, b){return a-b});
 
   return {
     geojson: geojson,
-    max_count: max_count,
-    min_count: min_count
+    counts: counts
   };
 };

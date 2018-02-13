@@ -56,8 +56,8 @@ class MapHolder extends Component {
             url_response_geohash_field={this.props.url_response_geohash_field}
             url_response_filtered_geohash_field={this.props.url_response_filtered_geohash_field}
             color_scheme = {this.props.color_scheme}
-            legend_stops = {this.props.legend_stops}
             no_legend_stops = {this.props.no_legend_stops}
+            is_legend_stops_data_driven = {this.props.is_legend_stops_data_driven}
             on_click = {this.props.on_click}
             map = {this.state.map} />
       </div>
