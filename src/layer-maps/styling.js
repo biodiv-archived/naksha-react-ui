@@ -510,6 +510,11 @@ function remove_layer_from_map(layer_name){
     //active_layers.splice(layer_name+'-highlighted', 1);
     console.log(active_layers);
     console.log(map)
+
+    // remove the layer styler from selected layers tab
+    var element = document.getElementById(layer_name + '_styler');
+    if (element !== undefined)
+        element.parentNode.removeChild(element);
 }
 
 function openTab(evt, div_name) {
