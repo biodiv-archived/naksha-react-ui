@@ -357,7 +357,7 @@ function expand_layer_details(layer_id) {
     if (thumb_div.children.length === 0){
         console.log('thumb', layer_id);
 	//uncomment following to get thumbnails through naksha
-	thumb_div.insertAdjacentHTML('afterbegin', "<img src=" + thumbnailsUrl + layer_id + "_thumb.gif></img>")
+	thumb_div.insertAdjacentHTML('afterbegin', "<img src=" + thumbnailsUrl + layer_id + "_thumb.gif onerror='this.src=" + thumbnailsUrl + "no_preview.png' style='width: 100%;height: 100%;'></img>")
 
 	//uncomment following to get thumbnails directly from geoserver
 	//thumb_div.insertAdjacentHTML('afterbegin', "<img src=http://" + get_host() + "/geoserver/www/map_thumbnails/" + layer_id +"_thumb.gif></img>")
@@ -405,6 +405,8 @@ function add_layer_to_map(layerName, layerTitle, layerBbox){
     document.getElementById("add_" + layerName + "_button").classList.toggle('hide');
     document.getElementById("rem_" + layerName + "_button").classList.toggle('hide');
     active_layers.push(layerName);
+    // fit bounds to new added layer
+    zoomToExtent(layerBbox);
 }
 
 function append_new_style(style){
@@ -448,22 +450,29 @@ function addLayerToSelectedTab(layerName, layerTitle, layerBbox, all_styles, sty
     })
     html +=  "<div id="+layerName+"_styler class='layer-div no-select'>"
             +   "<div class='layer-name-div no-select'>" + layerTitle + "</div>\n"
-            +   "<div class='zoom-to-extent-div inline' style='background-image:url("+thumbnailsUrl+"zoom-to-extent.png)' onclick='zoomToExtent(\""+layerBbox+"\")'>"
-            // +   "<img src="+icons_url+"zoom-to-extent.png style='margin: 0 4% 0 0;'></img>"
-            +   "zoom to extent"
-            +   "</div>"
-            +   "<div style='width: 18%;float: left;font-size: 14px;opacity: 0.5;margin: 0 0 0 3%;'>opacity</div>"
-            +   "<div class='slidecontainer inline'>"
+            +   "<div class='layer-styler-controls'>"
+            +     "<div class='zoom-to-extent-div inline' style='background-image:url("+thumbnailsUrl+"zoom-to-extent.png)' onclick='zoomToExtent(\""+layerBbox+"\")'>"
+            +       "zoom to extent"
+            +     "</div>"
+            +     "<div style='width: 18%;float: left;font-size: 14px;opacity: 0.5;margin: 0 0 0 3%;'>opacity</div>"
+            +     "<div class='slidecontainer inline'>"
             +       "<input id="+layerName+"_slider class='slider' type='range' min='1' max='100' step='5' value="+getOpacity(style)+" onchange='setOpacity(\""+layerName+"\",\""+layerType+"\", this.value)' oninput='setOpacity(\""+layerName+"\",\""+layerType+"\", this.value)'></input>"
+            +     "</div>"
             +   "</div>"
-            +   "<div style='font-size:14px; padding-top: 7%;'>Style by: "
+            +   "<div style='font-size:14px;'>Style by: "
             +       "<select class='style-selector' onchange='changeLayerStyle(\""+layerName+"\",this)'>"
             +           styleSelectorHTML
             +       "</select>"
             +   "</div>"
+	    +   "<div class='legend-div' onclick='toggleLegend(this)'>Legend</div>"
+	    +   "<img id='"+layerName+"_legend' class='hide legend' src=http://localhost:8080/geoserver/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&transparent=true&LAYER="+layerName+"&style="+all_styles[0].styleName+"></img>"
             +"</div>"
 
     selectedLayersPanel.innerHTML = html;
+}
+
+function toggleLegend(div) {
+	div.parentNode.getElementsByClassName('legend')[0].classList.toggle('hide');
 }
 
 function changeLayerStyle(layerName, layerStyleSelector) {
@@ -472,6 +481,10 @@ function changeLayerStyle(layerName, layerStyleSelector) {
     map.removeLayer(layerName);
     map.removeSource(layerName);
     append_new_style(getStyle(selectedStyle));
+
+    // update the legend according to new style
+    var legend = document.getElementById(layerName + '_legend');
+    legend.src = "http://localhost:8080/geoserver/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&transparent=true&LAYER="+layerName+"&style="+selectedStyle
 }
 
 function setOpacity(layerName, layerType, opacity) {
@@ -709,3 +722,4 @@ window.changeBaseLayer             =changeBaseLayer
 window.zoomToExtent                =zoomToExtent
 window.setOpacity                  =setOpacity
 window.changeLayerStyle            =changeLayerStyle
+window.toggleLegend                =toggleLegend
