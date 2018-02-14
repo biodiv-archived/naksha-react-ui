@@ -78,7 +78,7 @@
 .layer-name-div {
 	min-height: 20px;
 	height: auto;
-	width: 100%;
+	width: 80%;
 	cursor: pointer;
 	/*background-color: white;*/
 	margin: 2% 0% 2% 0%;
@@ -354,6 +354,7 @@
 .layer-styler-controls {
     width: 100%;
     height: 2em;
+    margin: 0%;
 }
 
 .legend-div {
