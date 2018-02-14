@@ -124,16 +124,8 @@ function SyncGoogleAndMapboxglMaps(map, gmap){
     });
 }
 
-function get_host_name(){
-    return 'localhost';
-}
-
-function get_port(){
-    return '8080';
-}
-
 function get_host(){
-    return get_host_name() + ":" + get_port();
+    return 'localhost:8080';
 }
 
 function getWorkspace() {
@@ -178,7 +170,6 @@ function httpGetAsync(theUrl, isXML=false)
         }
     }*/
     xmlHttp.open("GET", theUrl, false); // true for asynchronous
-    // xmlHttp.setRequestHeader('Access-Control-Allow-Origin', 'localhost:3000')
     xmlHttp.send();
     if (isXML)
         return xmlHttp.responseXML;
@@ -465,7 +456,7 @@ function addLayerToSelectedTab(layerName, layerTitle, layerBbox, all_styles, sty
             +       "</select>"
             +   "</div>"
 	    +   "<div class='legend-div' onclick='toggleLegend(this)'>Legend</div>"
-	    +   "<img id='"+layerName+"_legend' class='hide legend' src=http://localhost:8080/geoserver/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&transparent=true&LAYER="+layerName+"&style="+all_styles[0].styleName+"></img>"
+	    +   "<img id='"+layerName+"_legend' class='hide legend' src=" + baseUrl + "legend/" + layerName + "/" + all_styles[0].styleName+"></img>"
             +"</div>"
 
     selectedLayersPanel.innerHTML = html;
@@ -484,7 +475,7 @@ function changeLayerStyle(layerName, layerStyleSelector) {
 
     // update the legend according to new style
     var legend = document.getElementById(layerName + '_legend');
-    legend.src = "http://localhost:8080/geoserver/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&transparent=true&LAYER="+layerName+"&style="+selectedStyle
+    legend.src = baseUrl + "legend/" + layerName + "/" + selectedStyle
 }
 
 function setOpacity(layerName, layerType, opacity) {
@@ -679,8 +670,6 @@ export default {
 window.initMap                     =initMap
 window.initGoogleMap               =initGoogleMap
 window.initMapboxglMap             =initMapboxglMap
-window.get_host_name               =get_host_name
-window.get_port                    =get_port
 window.get_host                    =get_host
 window.getWorkspace                =getWorkspace
 window.get_map_style               =get_map_style
