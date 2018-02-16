@@ -1,3 +1,4 @@
+import IndiaBoundaries from '../common/india-boundaries.js'
 var mapboxgl = require('mapbox-gl')
 var GoogleMapsLoader = require('google-maps')
 
@@ -43,6 +44,11 @@ function initMapboxglMap(center, zoom) {
           zoom: zoom,
           style: 'mapbox://styles/mapbox/basic-v9' //india_boundary
         });
+
+    map.on('load', function() {
+      IndiaBoundaries(map)
+    })
+
     map.addControl(new mapboxgl.NavigationControl());
     addBaseLayerSelector(map);
     console.log(map.style);
