@@ -233,6 +233,7 @@ a.mapboxgl-ctrl-logo {
     display: flex;
     will-change: transform;
     pointer-events: none;
+    z-index: 2;
 }
 .mapboxgl-popup-anchor-top,
 .mapboxgl-popup-anchor-top-left,
