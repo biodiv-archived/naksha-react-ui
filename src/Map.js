@@ -5,6 +5,13 @@ mapboxgl.accessToken = 'undefined';
 
 class Map extends Component {
 
+  constructor(props) {
+    super(props);
+    this.props.map.on('load', () => {
+      this.applyMapData();
+    })
+  };
+
   onClick(e) {
     this.props.on_click(e, e.features[0].geometry.coordinates)
     .then( (fulfilled) => {
@@ -83,10 +90,6 @@ class Map extends Component {
         stops
       });
     }
-  }
-
-  componentDidMount() {
-    this.applyMapData();
   }
 
   componentDidUpdate() {

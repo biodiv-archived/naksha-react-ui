@@ -24,7 +24,7 @@ class Legend extends Component {
         <div className="main">
           <div className='mb6'>
             <h2 className="txt-bold txt-s block">Legend</h2>
-            <p className='txt-s color-gray'>1 sqaure = {this.props.area}</p>
+            <p className='txt-s color-gray'>1 square = {this.props.area}</p>
           </div>
           {renderLegendKeys(this.props.stops)}
         </div>
