@@ -5,7 +5,6 @@ import GeohashAggr from './geohash/geohash-aggregated-geojson'
 import LegendStops from './legend-stops'
 import axios from 'axios';
 import mapboxgl from 'mapbox-gl';
-import turfArea from '@turf/area';
 
 mapboxgl.accessToken = 'undefined';
 
@@ -93,34 +92,32 @@ class MapData extends Component {
   getPrecisionAndLevelForZoom(zoom) {
     if(!zoom)
       zoom = this.state.zoom;
-    if(zoom < 5)
-      return [4, 1];
-    else if(zoom < 6)
-      return [4, 1]
+    if(zoom < 6)
+      return [4, 1, 39.2]
     else if(zoom < 7)
-      return [5, 0]
+      return [5, 0, 19.6]
     else if(zoom < 8)
-      return [5, 1]
+      return [5, 1, 9.8]
     else if(zoom < 9)
-      return [5, -1]
+      return [5, -1, 4.9]
     else if(zoom < 10)
-      return [6, 0]
+      return [6, 0, 2.45]
     else if(zoom < 11)
-      return [6, 1]
+      return [6, 1, 1.225]
     else if(zoom < 12)
-      return [7, 0]
+      return [7, 0, 0.612]
     else if(zoom < 13)
-      return [7, 1]
+      return [7, 1, 0.306]
     else if(zoom < 14)
-      return [7, -1]
+      return [7, -1, 0.153]
     else if(zoom < 15)
-      return [8, 0];
+      return [8, 0, 0.077];
 
-    return [8, 1];
+    return [8, 1, 0.039];
   }
 
   setData(zoom, bounds, onlyFilteredAggregation) {
-    let [precision, level] = this.getPrecisionAndLevelForZoom(zoom);
+    let [precision, level, squareSide] = this.getPrecisionAndLevelForZoom(zoom);
     axios
       .get(this.props.url, {
         params: {
@@ -138,7 +135,7 @@ class MapData extends Component {
       }) => {
         this.updateData(data, level);
         if(!onlyFilteredAggregation)
-          this.updateStops(data, level);
+          this.updateStops(data, level, squareSide);
 
       })
       .catch((err) => {
@@ -157,27 +154,18 @@ class MapData extends Component {
     });
   }
 
-  updateStops(data, level) {
+  updateStops(data, level, squareSide) {
     data = this.props.url_response_geohash_field ? data[this.props.url_response_geohash_field] : data;
     data = JSON.parse(data);
     data = data[Object.keys(data)[0]].buckets;
 
     let geojson = level === -1 ? Geohash(data) : GeohashAggr(data, level);
     let stops = LegendStops(this.props.color_scheme, this.props.is_legend_stops_data_driven, this.props.no_legend_stops, geojson.counts);
-    this.updateArea(geojson.geojson);
+    let area = squareSide + "*" + squareSide + " km"
 
     this.setState({
-      stops: stops
-    });
-  }
-
-  updateArea(geojson) {
-    let areaSqm = Math.round(turfArea(geojson.features[0]));
-    let side = areaSqm/Math.sqrt(2);
-    side = areaSqm < 1000000 ? (side/1000000).toFixed(3) : Math.round(side/1000000);
-    let area = side + "*" + side + " km"
-    this.setState({
-      area : area
+      stops: stops,
+      area: area
     });
   }
 

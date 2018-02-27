@@ -2,7 +2,6 @@
   "name": "naksha-react-ui",
   "version": "0.1.0",
   "dependencies": {
-    "@turf/area": "^5.1.5",
     "axios": "^0.17.1",
     "base-64": "^0.1.0",
     "boundingbox": "^0.1.1",
