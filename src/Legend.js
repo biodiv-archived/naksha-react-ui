@@ -11,7 +11,7 @@ class Legend extends Component {
         let stopStr = i < stops.length - 1 ? <span>{`${stop[0]} - ${stops[i+1][0] -1}`}</span> : <span>{`${stop[0]} - `}</span>;
         html.push (
           <div key={i} className='txt-s'>
-            <span className='key' style={{ backgroundColor: stop[1] }} />
+            <span className='legend-key' style={{ backgroundColor: stop[1] }} />
             {stopStr}
           </div>
         );
