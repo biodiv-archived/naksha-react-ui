@@ -568,7 +568,7 @@ function showClickedFeature(event) {
     if (!features.length)
         clear_selected_features();
     hightlight_selected_feature(features);
-    //update_selected_feature_tree(features);
+    update_selected_feature_tree(features);
 }
 
 function hightlight_selected_feature(features) {
