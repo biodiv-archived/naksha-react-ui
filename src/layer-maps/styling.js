@@ -52,6 +52,10 @@ function initMapboxglMap(center, zoom) {
     map.addControl(new mapboxgl.NavigationControl());
     addBaseLayerSelector(map);
     console.log(map.style);
+    
+    map.on('click', function (e) {
+        showClickedFeature(e);
+    });
 }
 
 function addBaseLayerSelector() {
@@ -125,9 +129,6 @@ function SyncGoogleAndMapboxglMaps(map, gmap){
         sync_map_move(map, gmap);
     })
 
-    map.on('click', function (e) {
-        //showClickedFeature(e);
-    });
 }
 
 function get_host(){
@@ -384,7 +385,12 @@ function populateLayerPanel() {
 
 function toggleSideBar(){
     document.getElementById("nav").classList.toggle("nav--active");
-    document.getElementsByClassName('hamburger')[0].classList.toggle("is-active");
+    document.getElementById("nav").getElementsByClassName('hamburger')[0].classList.toggle("is-active");
+}
+
+function toggleFeaturesSideBar() {
+    document.getElementById("features-nav").classList.toggle("right-nav--active");
+    document.getElementById("features-nav").getElementsByClassName('hamburger')[0].classList.toggle("is-active");
 }
 
 function add_layer_to_map(layerName, layerTitle, layerBbox){
@@ -464,7 +470,10 @@ function addLayerToSelectedTab(layerName, layerTitle, layerBbox, all_styles, sty
             +           styleSelectorHTML
             +       "</select>"
             +   "</div>"
-	    +   "<div class='legend-div' onclick='toggleLegend(this)'>Legend</div>"
+	    +   "<div class='legend-div' onclick='toggleLegend(this)'>Legend"
+	    +       "<i class='fas fa-chevron-right'></i>"
+	    +   "</div>"
+
 	    +   "<img id='"+layerName+"_legend' class='hide legend' src=" + baseUrl + "legend/" + layerName + "/" + all_styles[0].styleName+"></img>"
             +"</div>"
 
@@ -473,6 +482,9 @@ function addLayerToSelectedTab(layerName, layerTitle, layerBbox, all_styles, sty
 
 function toggleLegend(div) {
 	div.parentNode.getElementsByClassName('legend')[0].classList.toggle('hide');
+	var legendArrow = div.getElementsByClassName('fas')[0]
+	legendArrow.classList.toggle('fa-chevron-down');
+	legendArrow.classList.toggle('fa-chevron-right');
 }
 
 function changeLayerStyle(layerName, layerStyleSelector) {
@@ -512,8 +524,8 @@ function remove_layer_from_map(layer_name){
     }
     console.log("Removing source " + layer_name)
     // map.isSourceLoaded(layer_name);
-    //if (map.getLayer(layer_name+'-highlighted') != undefined)
-    //    map.removeLayer(layer_name+'-highlighted');
+    if (map.getLayer(layer_name+'-highlighted') != undefined)
+        map.removeLayer(layer_name+'-highlighted');
     map.removeLayer(layer_name);
     map.removeSource(layer_name);
     document.getElementById("add_" + layer_name + "_button").classList.toggle('hide');
@@ -556,15 +568,30 @@ function showClickedFeature(event) {
     if (!features.length)
         clear_selected_features();
     hightlight_selected_feature(features);
-    update_selected_feature_tree(features);
+    //update_selected_feature_tree(features);
 }
 
 function hightlight_selected_feature(features) {
+
+    // clear currently highlighted layers
+	console.log(map.getStyle().layers);
+    map.getStyle().layers.forEach(function(layer) {
+	console.log(layer.id)
+	if (layer.id.indexOf('-highlighted') !== -1){
+	  console.log('Removing layer: ' + layer.id);
+	  if (map.getLayer(layer.id))
+	    map.removeLayer(layer.id)
+	}
+    })
+	console.log(map.getStyle().layers);
+
     for (var i = 0; i < features.length; i++){
         var feature = features[i];
         var layer = feature.layer.id
         console.log(feature)
-        map.addLayer({
+	if (map.getLayer(layer + '-highlighted') === undefined){
+	  console.log('Adding layer' + layer);
+          map.addLayer({
             'id': layer+'-highlighted',
             'type': 'line',
             'source': feature.layer.source,
@@ -574,9 +601,10 @@ function hightlight_selected_feature(features) {
                 'line-color': 'red'
             },
             'filter': ['in', '__mlocate__id', feature.properties.__mlocate__id]
-        })
-        if (active_layers.indexOf(layer+'-highlighted') === -1)
-            active_layers.push(layer+'-highlighted');
+          })
+	}
+        //if (active_layers.indexOf(layer+'-highlighted') === -1)
+        //    active_layers.push(layer+'-highlighted');
     }
 }
 
@@ -672,6 +700,7 @@ function sync_map_move(map, gmap){
 
 export default {
   toggleSideBar: toggleSideBar,
+  toggleFeaturesSideBar: toggleFeaturesSideBar,
   openTab: openTab,
   initMap: initMap
 }
@@ -721,3 +750,4 @@ window.zoomToExtent                =zoomToExtent
 window.setOpacity                  =setOpacity
 window.changeLayerStyle            =changeLayerStyle
 window.toggleLegend                =toggleLegend
+window.toggleFeaturesSideBar       =toggleFeaturesSideBar
