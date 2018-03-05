@@ -32,7 +32,7 @@ class Layers extends Component {
       </button> 
       </div>
 
-      <div id='features' className='hide'></div>
+      <div id='features'></div>
       </div>
     );
   }
