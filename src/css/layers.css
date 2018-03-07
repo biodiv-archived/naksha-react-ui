@@ -23,18 +23,31 @@
     top: 0;
     right: 0;
     bottom: 0;
-    width: 300px;
+    width: 85%;
     overflow: auto;
     background: rgba(255, 255, 255, 0.8);
 }
 
 .left-nav {
+	float: left;
 	top: 12%;
 	left: 0;
 	width: 30%;
 	transform: translate(0%, 0px);
 	transition: all 0.5s ease-out;
 	overflow: hidden;
+}
+
+.features-nav {
+	float: right;
+	position: relative;
+	top: 2%;
+	right: 0;
+	width: 30%;
+	transform: translate(45%, 0px);
+	transition: all 0.5s ease-out;
+	overflow: hidden;
+	z-index: 20;
 }
 
 .border-inside {
@@ -45,6 +58,10 @@
 
 .nav--active {
 	transform: translate(-95%, 0%);
+}
+
+.features-nav--active {
+	transform: translate(130%, 0%);
 }
 
 .nav-content {
@@ -269,7 +286,7 @@
 
 .base-layer-selector {
 	position: relative;
-	z-index: 100; /* This should always be higher than mapbox-gl map canvas*/
+	z-index: 10; /* This should always be higher than mapbox-gl map canvas*/
 	float: right;
     	margin: 1% 4% 0 0;
     	height: 2em;
