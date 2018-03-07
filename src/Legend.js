@@ -2,6 +2,19 @@ import React, { Component } from 'react';
 
 class Legend extends Component {
 
+  constructor(props) {
+      super(props);
+      this.state = {
+        showLegend : true
+      }
+  }
+
+  toggleShowLegend() {
+    this.setState({
+      showLegend : !this.state.showLegend
+    })
+  }
+
   render() {
 
     let renderLegendKeys = function (stops) {
@@ -21,13 +34,16 @@ class Legend extends Component {
 
     return (
       <div className="main-container">
-        <div className="main">
+        {this.state.showLegend && <div className="main">
           <div className='mb6'>
-            <h2 className="txt-bold txt-s block">Legend</h2>
+            <h2 className="txt-bold txt-s block">Legend<i className="fa fa-close pull-right" onClick={this.toggleShowLegend.bind(this)}></i></h2>
             <p className='txt-s color-gray'>1 square = {this.props.area}</p>
           </div>
           {renderLegendKeys(this.props.stops)}
-        </div>
+        </div>}
+        {!this.state.showLegend && <div className="main" onClick={this.toggleShowLegend.bind(this)}>
+          <i className="fa fa-align-justify"></i>
+        </div>}
       </div>
     )
   }
