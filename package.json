@@ -1,6 +1,28 @@
 {
   "name": "naksha-react-ui",
+  "description": "Visualize grid heat map or layer map from elastic search or https://github.com/strandls/naksha",
   "version": "0.1.0",
+  "keywords": [
+    "Heatmap",
+    "Naksha"
+  ],
+  "author": "mukund-strand",
+  "homepage": "https://github.com/strandls/naksha-react-ui",
+  "license": "Apache License 2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/strandls/naksha-react-ui.git"
+  },
+  "bugs": {
+    "url": "https://github.com/strandls/naksha-react-ui/issues"
+  },
+  "main": "./lib/index.js",
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "babel src -d lib && cp -r src/css lib && react-scripts build",
+    "test": "react-scripts test --env=jsdom",
+    "eject": "react-scripts eject"
+  },
   "dependencies": {
     "axios": "^0.17.1",
     "base-64": "^0.1.0",
@@ -14,24 +36,11 @@
     "react-dom": "^16.2.0",
     "react-scripts": "1.0.17"
   },
-  "scripts": {
-    "start": "react-scripts start",
-    "build": "babel src -d lib && cp -r src/css lib && react-scripts build",
-    "test": "react-scripts test --env=jsdom",
-    "eject": "react-scripts eject"
-  },
-  "main": "./lib/index.js",
   "devDependencies": {
     "babel-cli": "^6.26.0",
     "babel-plugin-inline-json": "^1.2.2",
     "babel-plugin-transform-react-jsx": "^6.24.1",
     "babel-plugin-transform-strict-mode": "^6.24.1",
     "babel-preset-env": "^1.6.1"
-  },
-  "homepage": "https://github.com/strandls/naksha-react-ui",
-  "license": "Apache License 2.0",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/strandls/naksha-react-ui.git"
   }
 }
