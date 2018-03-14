@@ -1,4 +1,5 @@
 import IndiaBoundaries from '../common/india-boundaries.js'
+import Config from '../common/config.js'
 var mapboxgl = require('mapbox-gl')
 var GoogleMapsLoader = require('google-maps')
 
@@ -39,7 +40,7 @@ function initGoogleMap(center, zoom) {
 }
 
 function initMapboxglMap(center, zoom) {
-    mapboxgl.accessToken = 'pk.eyJ1IjoicHJpeWFuc2h1LWEiLCJhIjoiY2phMmQ1bTFvNzRjZDMzcGdiNmQ5a3k5YSJ9.cpBkEIu8fQFAgx1cYuTQVg';
+    mapboxgl.accessToken = Config.mapboxgl_access_token;
     map = new mapboxgl.Map({
           container: 'map',
           center: [center.lng, center.lat],
@@ -54,7 +55,7 @@ function initMapboxglMap(center, zoom) {
     map.addControl(new mapboxgl.NavigationControl());
     addBaseLayerSelector(map);
     console.log(map.style);
-    
+
     map.on('click', function (e) {
         showClickedFeature(e);
     });
@@ -450,7 +451,7 @@ function addLayerToSelectedTab(layerName, layerTitle, layerBbox, all_styles, sty
 	styleSelectorHTML += "<option value=" + style.styleName + ">" + style.styleTitle + "</option>";
 	styleNameToTitleMap[style.styleName] = style.styleTitle;
     })
-    layerToStyleOptionsMap[layerName] = styleNameToTitleMap; 
+    layerToStyleOptionsMap[layerName] = styleNameToTitleMap;
     html +=  "<div id="+layerName+"_styler class='layer-div no-select'>"
 	    +   "<div class='row'>"
             +     "<div class='layer-name-div no-select col-sm-7'>" + layerTitle + "</div>"
@@ -524,7 +525,7 @@ function remove_layer_from_map(layer_name){
     }
     console.log("Removing source " + layer_name)
     // map.isSourceLoaded(layer_name);
-    if (map.getLayer(layer_name+'-highlighted') != undefined)
+    if (map.getLayer(layer_name+'-highlighted') !== undefined)
         map.removeLayer(layer_name+'-highlighted');
     map.removeLayer(layer_name);
     map.removeSource(layer_name);
