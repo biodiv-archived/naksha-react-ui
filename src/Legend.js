@@ -36,12 +36,12 @@ class Legend extends Component {
       <div className="main-container">
         {this.state.showLegend && <div className="main">
           <div className='mb6'>
-            <h2 className="txt-bold txt-s block">Legend<i className="fa fa-close pull-right" onClick={this.toggleShowLegend.bind(this)}></i></h2>
+            <h2 className="txt-bold txt-s block">Legend<i className="fa fa-close pull-right" onClick={this.toggleShowLegend.bind(this)} style={{cursor: 'pointer'}}></i></h2>
             <p className='txt-s color-gray'>1 square = {this.props.area}</p>
           </div>
           {renderLegendKeys(this.props.stops)}
         </div>}
-        {!this.state.showLegend && <div className="main" onClick={this.toggleShowLegend.bind(this)}>
+        {!this.state.showLegend && <div className="main" onClick={this.toggleShowLegend.bind(this)} style={{cursor: 'pointer'}} >
           <i className="fa fa-align-justify"></i>
         </div>}
       </div>

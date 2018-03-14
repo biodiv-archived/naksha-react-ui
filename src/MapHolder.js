@@ -2,8 +2,9 @@ import React, { Component } from 'react';
 import MapData from './MapData';
 import mapboxgl from 'mapbox-gl';
 import style from './css/style.json';
-
-mapboxgl.accessToken = 'undefined';
+import BackgroundControl from './common/BackgroundControl';
+// get from config
+mapboxgl.accessToken = 'pk.eyJ1IjoicHJpeWFuc2h1LWEiLCJhIjoiY2phMmQ1bTFvNzRjZDMzcGdiNmQ5a3k5YSJ9.cpBkEIu8fQFAgx1cYuTQVg';
 
 class MapHolder extends Component {
 
@@ -37,6 +38,9 @@ class MapHolder extends Component {
           enableHighAccuracy: true
         },trackUserLocation: true});
       map.addControl(location);
+
+      var styleOptions = [{name: 'Openstreetmap', style: style}, {name: 'Satellite', style: 'mapbox://styles/mapbox/satellite-v9'}]
+      map.addControl(new BackgroundControl(styleOptions));
 
       let default_zoom = map.getZoom();
       this.setState({
