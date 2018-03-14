@@ -23,7 +23,7 @@ class Layers extends Component {
               <button className='tablinks' onClick={(e) => openTab(e, "nav-selected-layers")}>Selected Layers</button>
           </div>
           <div id='nav-all-layers' className='tabcontent'></div>
-          <div id='nav-selected-layers' className='tabcontent'></div>
+          <div id='nav-selected-layers' className='tabcontent hide'></div>
         </div>
         <button className="hamburger hamburger--arrow is-active" type="button" onClick={() => toggleSideBar()}>
  	 <div className="hamburger-box">
@@ -32,8 +32,8 @@ class Layers extends Component {
         </button> 
       </div>
 
-      <div id='features-nav' className='features-nav border-inside fill-height'>
-	<button className="hamburger hamburger--arrow-r is-active" type="button" onClick={() => toggleFeaturesSideBar()}>
+      <div id='features-nav' className='features-nav features-nav--active border-inside fill-height'>
+	<button className="hamburger hamburger--arrow-r" type="button" onClick={() => toggleFeaturesSideBar()}>
  	 <div className="hamburger-box">
    	   <div className="hamburger-inner"></div>
  	 </div>

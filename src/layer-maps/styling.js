@@ -22,7 +22,7 @@ var map = null;
 
 function initMap() {
     var india_center = {lat: 25, lng: 77};
-    var zoom = 4;
+    var zoom = 3;
     // var gZoom = zoom + 1; // Google zoom levels are one higher than mapboxgl
     initMapboxglMap(india_center, zoom);
     // initGoogleMap(india_center, gZoom);
@@ -461,7 +461,7 @@ function addLayerToSelectedTab(layerName, layerTitle, layerBbox, all_styles, sty
             +     "<div class='col-sm-5 zoom-to-extent-div inline' style='background-image:url("+thumbnailsUrl+"zoom-to-extent.png)' onclick='zoomToExtent(\""+layerBbox+"\")'>"
             +       "zoom to extent"
             +     "</div>"
-            +     "<div style='width: 18%;float: left;font-size: 14px;opacity: 0.5;margin: 0 0 0 3%;' class='col-sm-3'>opacity</div>"
+            +     "<div style='width: 18%;float: left;font-size: 14px;opacity: 0.5;margin: 0 0 0 3%; padding-left: 0%;' class='col-sm-3'>opacity</div>"
             +     "<div class='slidecontainer inline col-sm-3'>"
             +       "<input id="+layerName+"_slider class='slider' type='range' min='1' max='100' step='5' value="+getOpacity(style)+" onchange='setOpacity(\""+layerName+"\",\""+layerType+"\", this.value)' oninput='setOpacity(\""+layerName+"\",\""+layerType+"\", this.value)'></input>"
             +     "</div>"
@@ -491,7 +491,10 @@ function toggleLegend(div) {
 function changeLayerStyle(layerName, layerStyleSelector) {
     var option = layerStyleSelector.options[layerStyleSelector.selectedIndex];
     var selectedStyle = option.getAttribute('value');
+    var highlightedLayer = layerName + '-highlighted'
     map.removeLayer(layerName);
+    if (map.getLayer(highlightedLayer))
+      map.removeLayer(highlightedLayer);
     map.removeSource(layerName);
     append_new_style(getStyle(selectedStyle));
 
@@ -566,64 +569,88 @@ function openTab(evt, div_name) {
 
 function showClickedFeature(event) {
     var features = map.queryRenderedFeatures(event.point);
-    if (!features.length)
+    if (!features.length){
         clear_selected_features();
+	console.log("clearing_selected_features: ", document.getElementById("features-nav").classList.contains("features-nav--active"));
+    	if (document.getElementById("features-nav").classList.contains("features-nav--active") == false)
+            toggleFeaturesSideBar();
+
+	return;
+    }
     highlightSelectedFeature(features);
     updateSelectedFeatureTree(features);
+    if (document.getElementById("features-nav").classList.contains("features-nav--active"))
+        toggleFeaturesSideBar();
 }
 
-function highlightSelectedFeature(features) {
+function removeHighlightedLayers(map){
 
     // clear currently highlighted layers
-	console.log(map.getStyle().layers);
     map.getStyle().layers.forEach(function(layer) {
-	console.log(layer.id)
 	if (layer.id.indexOf('-highlighted') !== -1){
-	  console.log('Removing layer: ' + layer.id);
 	  if (map.getLayer(layer.id))
 	    map.removeLayer(layer.id)
 	}
     })
-	console.log(map.getStyle().layers);
+}
 
+function highlightSelectedFeature(features) {
+
+    console.log(map.getStyle().layers);
+    removeHighlightedLayers(map)
+    var layerToFeatures = {};
     for (var i = 0; i < features.length; i++){
-        var feature = features[i];
+	var feature = features[i];
+	// skip if the feature is coming from the mapbox base layers
 	if (feature.layer.source === 'mapbox' || feature.layer.source === 'claimedboundaries')
 	  continue;
-        var layer = feature.layer.id
-        console.log(feature)
-	if (map.getLayer(layer + '-highlighted') === undefined){
-	  console.log('Adding layer' + layer);
-	  var layerType = feature.layer.type;
-	  var _type, _paint;
-	  if (layerType === 'fill'){
-	    _type = 'line';
-	    _paint = {'line-width': 1, 'line-color': 'red'};
-	  }
-	  else if (layerType === 'circle'){
-	    _type = 'circle';
-	    _paint = {'circle-opacity': 0, 'circle-stroke-width': 1, 'circle-stroke-color': 'red'}
-	  }
 
-	  // create a layer for highlighted features
-          map.addLayer({
-            'id': layer+'-highlighted',
-            'type': _type, //'line',
-            'source': feature.layer.source,
-            'source-layer': feature.layer.source,
-            'paint': _paint, /*{
-                'line-width': 1,
-                'line-color': 'red'
-            },*/
-            'filter': ['in', '__mlocate__id', feature.properties.__mlocate__id]
-          })
-	}
-        //if (active_layers.indexOf(layer+'-highlighted') === -1)
-        //    active_layers.push(layer+'-highlighted');
+	var layer = feature.layer.id;
+	if (!layerToFeatures[layer])
+	    layerToFeatures[layer] = new Set();
+
+	layerToFeatures[layer].add(feature); //TODO: avoid adding the complete feature object
     }
+
+    Object.keys(layerToFeatures).forEach(function(layer) {
+	var features = layerToFeatures[layer];
+	var layerType;
+	var layerSource;
+	var filter = ['in', '__mlocate__id'];
+	features.forEach(function(feature){
+	    if (!layerType){
+		layerType = feature.layer.type;
+		layerSource = feature.layer.source;
+	    }
+	    filter.push(feature.properties.__mlocate__id)
+	});
+
+	var _type, _paint;
+	if (layerType === 'fill'){
+	  _type = 'line';
+	  _paint = {'line-width': 1, 'line-color': 'red'};
+	}
+	else if (layerType === 'circle'){
+	  _type = 'circle';
+	  _paint = {'circle-opacity': 0, 'circle-stroke-width': 1, 'circle-stroke-color': 'red'}
+	}
+
+		   
+	// create a layer for highlighted features
+        map.addLayer({
+            'id': layer+'-highlighted',
+            'type': _type,
+            'source': layerSource,
+            'source-layer': layerSource,
+            'paint': _paint,
+            'filter': filter
+        })
+
+    })
 }
 
 function clear_selected_features() {
+    removeHighlightedLayers(map)
     clear_selected_feature_tree();
 }
 
@@ -641,15 +668,14 @@ function clear_selected_feature_tree(){
 }
 
 function updateSelectedFeatureTree(features) {
-    var selected_features_json = {};
-    var num_layers = features.length;
-    for (var i = 0; i < num_layers; i++){
+    var selectedFeaturesJson = {};
+    for (var i = 0; i < features.length; i++){
 	if (features[i].layer.source === 'mapbox' || features[i].layer.source === 'claimedboundaries')
 	  continue;
 	var attributes = filterAttributes(features[i]);
-        selected_features_json[layerNameToTitleMap[features[i].layer.id]] = attributes;
+        selectedFeaturesJson[layerNameToTitleMap[features[i].layer.id]] = attributes;
     }
-    document.getElementById('features').innerHTML = renderJSON(selected_features_json);
+    document.getElementById('features').innerHTML = renderJSON(selectedFeaturesJson);
 }
 
 function filterAttributes(feature) {
