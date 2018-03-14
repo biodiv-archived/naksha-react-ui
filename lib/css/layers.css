@@ -1,0 +1,379 @@
+.body {
+	margin:0;
+	padding:0;
+	overflow: hidden
+}
+
+.map {
+	/*margin:1% 0 0 0;*/
+	position: absolute;
+	width: 95% !important;
+	height: 80%;
+	border: black;
+	top: auto !important;
+	bottom: auto !important;
+}
+
+.map canvas {
+	cursor: crosshair;
+}
+
+#features {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 85%;
+    overflow: auto;
+    background: rgba(255, 255, 255, 0.8);
+}
+
+.left-nav {
+	float: left;
+	top: 12%;
+	left: 0;
+	width: 30%;
+	transform: translate(0%, 0px);
+	transition: all 0.5s ease-out;
+	overflow: hidden;
+}
+
+.features-nav {
+	float: right;
+	position: relative;
+	top: 2%;
+	right: 0;
+	width: 30%;
+	transform: translate(45%, 0px);
+	transition: all 0.5s ease-out;
+	overflow: hidden;
+	z-index: 20;
+}
+
+.border-inside {
+	box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+}
+
+.nav--active {
+	transform: translate(-95%, 0%);
+}
+
+.features-nav--active {
+	transform: translate(130%, 0%);
+}
+
+.nav-content {
+	float: left;
+	width: 85%;
+	height: 100%;
+	background-color: #f1f1f1;
+}
+
+#nav-all-layers {
+	height: 90%;
+	overflow-y: scroll;
+}
+
+#nav-selected-layers {
+	height: 90%;
+	overflow-y: scroll;
+}
+
+.header {
+	height: 10%;
+	width: 100%;
+}
+
+.fill-height {
+	min-height: 90%;
+	height: 90%;
+}
+
+.layer-name-div {
+	min-height: 20px;
+	height: auto;
+	width: 80%;
+	cursor: pointer;
+	/*background-color: white;*/
+	margin: 2% 0% 2% 0%;
+	/*padding: 1% 1% 1% 1%;*/
+	color: black;
+}
+
+.no-select {
+	-webkit-touch-callout: none; /* iOS Safari */
+    -webkit-user-select: none; /* Safari */
+     -khtml-user-select: none; /* Konqueror HTML */
+       -moz-user-select: none; /* Firefox */
+        -ms-user-select: none; /* Internet Explorer/Edge */
+            user-select: none; /* Non-prefixed version, currently
+                                  supported by Chrome and Opera */
+}
+
+.pointer {
+	cursor: pointer;
+}
+
+.layer-div {
+	width: 97%;
+	background-color: white;
+	margin: 2% 1% 1% 2%;
+	padding: 1% 2% 1% 2%;
+	border-radius: 1vh;
+}
+
+.layer-expanded {
+	height: 85px;
+	width: 100%;
+	display: block;
+}
+
+.hide {
+	display: none;
+}
+
+.layer-thumb {
+	height: 95%;
+	width: 25%;
+	border: solid;
+	border-width: 1px;
+	float: left;
+}
+
+
+.layer-desc {
+	height: 40px;
+	width: 70%;
+	/*border: solid;*/
+	float: right;
+	font-size: 12px;
+	padding: 1%;
+	overflow-y: auto;
+	margin: 0% 0% 2% 0%;
+}
+
+.add-layer-button {
+	margin: 2% 0% 0% 0;
+	float: right;
+}
+
+/*-----------------------------------------------------------------------------------*/
+
+/* Style for tabbed pane */
+/* Style the tab */
+.tab {
+    overflow: hidden;
+    border: 1px solid #ccc;
+    background-color: #f1f1f1;
+}
+
+/* Style the buttons that are used to open the tab content */
+.tab button {
+    background-color: inherit;
+    float: left;
+    border: none;
+    outline: none;
+    cursor: pointer;
+    padding: 14px 16px;
+    transition: 0.3s;
+}
+
+/* Change background color of buttons on hover */
+.tab button:hover {
+    background-color: #ddd;
+}
+
+/* Create an active/current tablink class */
+.tab button.active {
+    background-color: #ccc;
+}
+
+/*-----------------------------------------------------------------------------------*/
+
+.float-right {
+	float: right;
+}
+
+.tree-expandable {
+	font-size: 2vh;
+	border: solid;
+	border-color: #aaaaaa;
+	border-radius: 1vh;
+	border-width: 0.5vh;
+	padding: 1vh;
+	margin: 1vh;
+}
+
+.tree-node {
+	margin: 0 0 0 5%;
+	font-size: 1.5vh;
+	color: blue;
+}
+
+/*-----------------------------------------------------------------------------------*/
+/*Slider bar*/
+
+.slidecontainer {
+    width: 32%; /* Width of the outside container */
+    float: left;
+    margin: 2% 0 0 0;
+}
+
+.slidercontainer input {
+	width: 100%;
+}
+
+/* The slider itself */
+.slider {
+	border-radius: 10px;
+    -webkit-appearance: none;  /* Override default CSS styles */
+    appearance: none;
+    width: 100%;  /*Full-width */
+    height: 0.2em; /* Specified height */
+    background: #d3d3d3; /* Grey background */
+    outline: none; /* Remove outline */
+    /*opacity: 0.7;*/ /* Set transparency (for mouse-over effects on hover) */
+    -webkit-transition: .2s; /* 0.2 seconds transition on hover */
+    transition: opacity .2s;
+    padding: 0;
+	margin: 2% 0 0 0;
+}
+
+/* Mouse-over effects */
+.slider:hover {
+    opacity: 1; /* Fully shown on mouse-over */
+}
+
+/* The slider handle (use -webkit- (Chrome, Opera, Safari, Edge) and -moz- (Firefox) to override default look) */
+.slider::-webkit-slider-thumb {
+    -webkit-appearance: none; /* Override default look */
+    appearance: none;
+    width: 15px; /* Set a specific slider handle width */
+    height: 15px; /* Slider handle height */
+    border-radius: 50%;
+    background: #f1f1f1; /* Green background */
+    cursor: pointer; /* Cursor on hover */
+}
+
+.slider::-moz-range-thumb {
+    width: 15px; /* Set a specific slider handle width */
+    height: 15px; /* Slider handle height */
+    border-radius: 50%;
+    background: #f1f1f1; /* Green background */
+    cursor: pointer; /* Cursor on hover */
+}
+
+/*-----------------------------------------------------------------------------------*/
+
+.zoom-to-extent-div {
+    background-repeat: no-repeat;
+    background-position: left center;
+    cursor: pointer;
+    opacity: 0.5;
+    margin: 0% 0 0 1%;
+    padding: 0% 4% 0 6%;
+    float: left;
+    border-right: solid 1px;
+    font-size: 14px;
+    width: 41%;
+}
+
+.inline {
+	display: inline;
+}
+
+.base-layer-selector {
+	position: relative;
+	z-index: 10; /* This should always be higher than mapbox-gl map canvas*/
+	float: right;
+    	margin: 1% 4% 0 0;
+    	height: 2em;
+}
+
+/*---------------------------------------------------------------------------------*/
+
+/*Hamburger CSS*/
+/*!
+ * Hamburgers
+ * @description Tasty CSS-animated hamburgers
+ * @author Jonathan Suh @jonsuh
+ * @site https://jonsuh.com/hamburgers
+ * @link https://github.com/jonsuh/hamburgers
+ */
+.hamburger {
+  width: 15%;
+  padding: 2%;
+  display: inline-block;
+  cursor: pointer;
+  transition-property: opacity, filter;
+  transition-duration: 0.15s;
+  transition-timing-function: linear;
+  font: inherit;
+  color: inherit;
+  text-transform: none;
+  background-color: #f1f1f1;
+  border: solid black 1px;
+  margin: 0;
+  overflow: visible; }
+  .hamburger:hover {
+    opacity: 0.7; }
+
+.hamburger-box {
+  width: 40px;
+  height: 24px;
+  display: inline-block;
+  position: relative; }
+
+.hamburger-inner {
+  display: block;
+  top: 50%;
+  margin-top: -2px; }
+  .hamburger-inner, .hamburger-inner::before, .hamburger-inner::after {
+    width: 40px;
+    height: 4px;
+    background-color: #000;
+    border-radius: 4px;
+    position: absolute;
+    transition-property: transform;
+    transition-duration: 0.15s;
+    transition-timing-function: ease; }
+  .hamburger-inner::before, .hamburger-inner::after {
+    content: "";
+    display: block; }
+  .hamburger-inner::before {
+    top: -10px; }
+  .hamburger-inner::after {
+    bottom: -10px; }
+
+/*
+   * Arrow
+   */
+.hamburger--arrow.is-active .hamburger-inner::before {
+  transform: translate3d(-8px, 0, 0) rotate(-45deg) scale(0.7, 1); }
+
+.hamburger--arrow.is-active .hamburger-inner::after {
+  transform: translate3d(-8px, 0, 0) rotate(45deg) scale(0.7, 1); }
+
+/*
+   * Arrow Right
+   */
+.hamburger--arrow-r.is-active .hamburger-inner::before {
+  transform: translate3d(8px, 0, 0) rotate(45deg) scale(0.7, 1); }
+
+.hamburger--arrow-r.is-active .hamburger-inner::after {
+  transform: translate3d(8px, 0, 0) rotate(-45deg) scale(0.7, 1); }
+
+/*-----------------------------------------------------------------------------*/
+
+.layer-styler-controls {
+    width: 100%;
+    height: 2em;
+    margin: 0%;
+}
+
+.legend-div {
+    margin-top: 2%;
+    cursor: pointer;
+}
