@@ -1,12 +1,13 @@
 {
   "name": "naksha-react-ui",
-  "description": "Visualize grid heat map or layer map from elastic search or https://github.com/strandls/naksha",
+  "description": "Visualize geohash heat map or layer map from elastic search or https://github.com/strandls/naksha",
   "version": "0.1.2",
   "keywords": [
     "Heatmap",
-    "Naksha"
+    "Naksha",
+    "Geohash"
   ],
-  "author": "mukund-strand",
+  "author": "mukund@strandls.com",
   "homepage": "https://github.com/strandls/naksha-react-ui",
   "license": "Apache License 2.0",
   "repository": {
