@@ -1,7 +1,7 @@
 {
   "name": "naksha-react-ui",
   "description": "Visualize geohash heat map or layer map from elastic search or https://github.com/strandls/naksha",
-  "version": "0.1.2",
+  "version": "1.0.0",
   "keywords": [
     "Heatmap",
     "Naksha",
