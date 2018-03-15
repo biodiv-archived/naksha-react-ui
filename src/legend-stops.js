@@ -8,6 +8,9 @@ module.exports = function(color_scheme, is_legend_stops_data_driven, no_stops, c
 
   stops.push([0, cb[color_scheme][no_stops][0]]);
 
+  if(counts.length === 1)
+    return stops;
+
   if(!is_legend_stops_data_driven) {
      let max_count = counts[counts.length-1];
      for (let i = 1; i < no_stops; i++) {
@@ -21,7 +24,7 @@ module.exports = function(color_scheme, is_legend_stops_data_driven, no_stops, c
   let interval = Math.round(counts.length/no_stops);
 
   if(interval === 0) {
-    for (let i = 1; i < no_stops; i++)
+    for (let i = 1; i < counts.length; i++)
       stops.push([counts[i], cb[color_scheme][no_stops][i]]);
 
     return stops;
