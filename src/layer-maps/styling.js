@@ -3,7 +3,7 @@ import Config from '../common/config.js'
 var mapboxgl = require('mapbox-gl')
 var GoogleMapsLoader = require('google-maps')
 
-var baseUrl = "http://" + get_host() + "/naksha/geoserver/"
+var baseUrl = "https://" + get_host() + "/naksha/geoserver/"
 var workspace_name = 'biodiv'
 var thumbnailsUrl = baseUrl + "thumbnails/";
 
