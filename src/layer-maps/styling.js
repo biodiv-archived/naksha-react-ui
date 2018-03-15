@@ -135,7 +135,7 @@ function SyncGoogleAndMapboxglMaps(map, gmap){
 }
 
 function get_host(){
-    return 'localhost:8080';
+    return Config.geoserver_path;
 }
 
 function getWorkspace() {
@@ -572,7 +572,7 @@ function showClickedFeature(event) {
     if (!features.length){
         clear_selected_features();
 	console.log("clearing_selected_features: ", document.getElementById("features-nav").classList.contains("features-nav--active"));
-    	if (document.getElementById("features-nav").classList.contains("features-nav--active") == false)
+    	if (document.getElementById("features-nav").classList.contains("features-nav--active") === false)
             toggleFeaturesSideBar();
 
 	return;
@@ -635,7 +635,7 @@ function highlightSelectedFeature(features) {
 	  _paint = {'circle-opacity': 0, 'circle-stroke-width': 1, 'circle-stroke-color': 'red'}
 	}
 
-		   
+
 	// create a layer for highlighted features
         map.addLayer({
             'id': layer+'-highlighted',
