@@ -523,11 +523,11 @@ function getOpacity(style){
 }
 
 function remove_layer_from_map(layer_name){
-    if (active_layers.indexOf(layer_name) === -1){
+    var index = active_layers.indexOf(layer_name);
+    if (index === -1){
         alert("Layer " + layer_name + " is not present on the map");
     }
     console.log("Removing source " + layer_name)
-    // map.isSourceLoaded(layer_name);
     if (map.getLayer(layer_name+'-highlighted') !== undefined)
         map.removeLayer(layer_name+'-highlighted');
     map.removeLayer(layer_name);
@@ -535,7 +535,7 @@ function remove_layer_from_map(layer_name){
     document.getElementById("add_" + layer_name + "_button").classList.toggle('hide');
     document.getElementById("rem_" + layer_name + "_button").classList.toggle('hide');
     console.log(active_layers);
-    active_layers.splice(layer_name, 1);
+    active_layers.splice(index, 1);
     //active_layers.splice(layer_name+'-highlighted', 1);
     console.log(active_layers);
     console.log(map)
