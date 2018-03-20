@@ -385,3 +385,7 @@
     right: 4% !important;
     right: 0;
 }
+
+.expanded {
+    display: block !important;
+}

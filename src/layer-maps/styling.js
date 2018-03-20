@@ -668,14 +668,34 @@ function clear_selected_feature_tree(){
 }
 
 function updateSelectedFeatureTree(features) {
-    var selectedFeaturesJson = {};
+    var selectedFeaturesJSON = {};
     for (var i = 0; i < features.length; i++){
 	if (features[i].layer.source === 'mapbox' || features[i].layer.source === 'claimedboundaries')
 	  continue;
 	var attributes = filterAttributes(features[i]);
-        selectedFeaturesJson[layerNameToTitleMap[features[i].layer.id]] = attributes;
+        selectedFeaturesJSON[layerNameToTitleMap[features[i].layer.id]] = attributes;
     }
-    document.getElementById('features').innerHTML = renderJSON(selectedFeaturesJson);
+    document.getElementById('features').innerHTML = createFeatureTreeHTML(selectedFeaturesJSON);
+}
+
+function createFeatureTreeHTML(selectedFeaturesJSON) {
+    var expandedDivs = [];
+    var divs = document.getElementById('features').getElementsByClassName('tree-expandable');
+    for (var i = 0; i < divs.length; i++){
+	if (divs[i].getElementsByClassName('expanded').length > 0)
+	  expandedDivs.push(divs[i].children[0].innerText);
+    };
+
+    var retValue = "";
+    for (var key in selectedFeaturesJSON) {
+	var hiddenClass = expandedDivs.includes(key) ? 'expanded' : 'hide';
+        retValue += "<div class='tree-expandable'>";
+        retValue += "<div class='pointer no-select' onclick='toggleAllChildren(this.parentElement)'>" + key + "</div>";
+        retValue += "<div class='card-details " + hiddenClass + "'>"
+        retValue += renderJSON(selectedFeaturesJSON[key]);
+        retValue += "</div></div>";
+    }
+    return retValue;
 }
 
 function filterAttributes(feature) {
@@ -693,21 +713,11 @@ function filterAttributes(feature) {
 }
 
 function renderJSON(obj) {
-    var keys = [],
-        retValue = "";
+    var retValue = "";
     for (var key in obj) {
         if (key.startsWith("__"))
             continue;
-        if (typeof obj[key] === 'object') {
-            retValue += "<div class='tree-expandable'>";
-            retValue += "<div class='pointer no-select' onclick='toggleAllChildren(this.parentElement)'>" + key + "</div>";
-            retValue += renderJSON(obj[key]);
-            retValue += "</div>";
-        } else {
-            retValue += "<div class='tree-node hide'>" + key + " : " + obj[key] + "</div>";
-        }
-
-        keys.push(key);
+        retValue += "<div class='tree-node'>" + key + " : " + obj[key] + "</div>";
     }
     return retValue;
 }
@@ -715,11 +725,9 @@ function renderJSON(obj) {
 function toggleAllChildren(div) {
     if (!div.hasChildNodes())
         return;
-    var children = div.childNodes;
-    // var isCollapsed = children[1].style.display == '';
-    for (var i = 1; i < children.length; i++){
-        children[i].classList.toggle('hide');
-    }
+    div.children[1].classList.toggle('hide');
+    div.children[1].classList.toggle('expanded');
+    return;
 }
 
 function set_initial_zoom(map){
