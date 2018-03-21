@@ -470,7 +470,7 @@ function addLayerToSelectedTab(layerName, layerTitle, layerBbox, all_styles, sty
             +       "</select>"
             +   "</div>"
 	    +   "<div class='legend-div' onclick='toggleLegend(this)'>Legend"
-	    +       "<i class='fas fa-chevron-right'></i>"
+	    +       "<i class='fa fa-chevron-right' style='font-size:10px;margin:2%;'></i>"
 	    +   "</div>"
 
 	    +   "<img id='"+layerName+"_legend' class='hide legend' src=" + baseUrl + "legend/" + layerName + "/" + all_styles[0].styleName+"></img>"
@@ -481,7 +481,7 @@ function addLayerToSelectedTab(layerName, layerTitle, layerBbox, all_styles, sty
 
 function toggleLegend(div) {
 	div.parentNode.getElementsByClassName('legend')[0].classList.toggle('hide');
-	var legendArrow = div.getElementsByClassName('fas')[0]
+	var legendArrow = div.getElementsByClassName('fa')[0]
 	legendArrow.classList.toggle('fa-chevron-down');
 	legendArrow.classList.toggle('fa-chevron-right');
 }
