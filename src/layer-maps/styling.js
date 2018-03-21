@@ -54,7 +54,6 @@ function initMapboxglMap(center, zoom) {
 
     map.addControl(new mapboxgl.NavigationControl());
     addBaseLayerSelector(map);
-    console.log(map.style);
 
     map.on('click', function (e) {
         showClickedFeature(e);
@@ -173,7 +172,6 @@ function httpGetAsync(theUrl, isXML=false)
     // below code is used in case of async requests,
     // which is the correct way going forward
     /*xmlHttp.onreadystatechange = function() {
-    	console.log(xmlHttp.readyState);
         if (xmlHttp.readyState == 4){
         	callback(xmlHttp.responseText)
             // return xmlHttp.responseText;
@@ -504,7 +502,6 @@ function changeLayerStyle(layerName, layerStyleSelector) {
 }
 
 function setOpacity(layerName, layerType, opacity) {
-    console.log(layerName, layerType, opacity);
     if (map.getLayer(layerName) === undefined)
 	return;
     if (layerType === 'fill')
@@ -538,7 +535,6 @@ function remove_layer_from_map(layer_name){
     active_layers.splice(index, 1);
     //active_layers.splice(layer_name+'-highlighted', 1);
     console.log(active_layers);
-    console.log(map)
 
     // remove the layer styler from selected layers tab
     var element = document.getElementById(layer_name + '_styler');
@@ -549,7 +545,6 @@ function remove_layer_from_map(layer_name){
 function openTab(evt, div_name) {
     // Declare all variables
     var i, tabcontent, tablinks;
-    console.log('div name', div_name);
     // Get all elements with class="tabcontent" and hide them
     tabcontent = document.getElementsByClassName("tabcontent");
     for (i = 0; i < tabcontent.length; i++) {
@@ -567,18 +562,49 @@ function openTab(evt, div_name) {
     evt.currentTarget.className += " active";
 }
 
+function filterOutMapboxFeatures(features) {
+    // skip if the feature is coming from the mapbox base layers
+    var retFeatures = [];
+    for (var i = 0; i < features.length; i++){
+	if (features[i].layer.source === 'mapbox' || features[i].layer.source === 'claimedboundaries')
+	  continue;
+	retFeatures.push(features[i]);
+    }
+    return retFeatures; 
+}
+
 function showClickedFeature(event) {
-    var features = map.queryRenderedFeatures(event.point);
+    var _features = map.queryRenderedFeatures(event.point);
+    var features = filterOutMapboxFeatures(_features);
     if (!features.length){
         clear_selected_features();
-	console.log("clearing_selected_features: ", document.getElementById("features-nav").classList.contains("features-nav--active"));
     	if (document.getElementById("features-nav").classList.contains("features-nav--active") === false)
             toggleFeaturesSideBar();
 
 	return;
     }
-    highlightSelectedFeature(features);
-    updateSelectedFeatureTree(features);
+
+    // since there can be multiple selected features for a single layer
+    var layerToFeatures = {};
+    var layerToFeatureIDs = {};
+
+    for (var i = 0; i < features.length; i++){
+	var feature = features[i];
+
+	var layer = feature.layer.id;
+	if (!layerToFeatures[layer]){
+	    layerToFeatures[layer] = new Set();
+            layerToFeatureIDs[layer] = [];
+        }
+
+	if (!layerToFeatureIDs[layer].includes(feature.properties.__mlocate__id)){
+	    layerToFeatures[layer].add(feature); //TODO: avoid adding the complete feature object
+            layerToFeatureIDs[layer].push(feature.properties.__mlocate__id);
+        }
+    }
+
+    highlightSelectedFeature(layerToFeatures);
+    updateSelectedFeatureTree(layerToFeatures);
     if (document.getElementById("features-nav").classList.contains("features-nav--active"))
         toggleFeaturesSideBar();
 }
@@ -594,24 +620,9 @@ function removeHighlightedLayers(map){
     })
 }
 
-function highlightSelectedFeature(features) {
+function highlightSelectedFeature(layerToFeatures) {
 
-    console.log(map.getStyle().layers);
     removeHighlightedLayers(map)
-    var layerToFeatures = {};
-    for (var i = 0; i < features.length; i++){
-	var feature = features[i];
-	// skip if the feature is coming from the mapbox base layers
-	if (feature.layer.source === 'mapbox' || feature.layer.source === 'claimedboundaries')
-	  continue;
-
-	var layer = feature.layer.id;
-	if (!layerToFeatures[layer])
-	    layerToFeatures[layer] = new Set();
-
-	layerToFeatures[layer].add(feature); //TODO: avoid adding the complete feature object
-    }
-
     Object.keys(layerToFeatures).forEach(function(layer) {
 	var features = layerToFeatures[layer];
 	var layerType;
@@ -663,18 +674,20 @@ function get_style_by(feature) {
         return null;
 }
 
-function clear_selected_feature_tree(){
+function clear_selected_feature_tree() {
     document.getElementById('features').innerHTML = "";
 }
 
-function updateSelectedFeatureTree(features) {
+function updateSelectedFeatureTree(layerToFeatures) {
     var selectedFeaturesJSON = {};
-    for (var i = 0; i < features.length; i++){
-	if (features[i].layer.source === 'mapbox' || features[i].layer.source === 'claimedboundaries')
-	  continue;
-	var attributes = filterAttributes(features[i]);
-        selectedFeaturesJSON[layerNameToTitleMap[features[i].layer.id]] = attributes;
-    }
+    Object.keys(layerToFeatures).forEach(function(layer) {
+      var features = layerToFeatures[layer];
+      selectedFeaturesJSON[layerNameToTitleMap[layer]] = [];
+      features.forEach(function(feature){
+	var attributes = filterAttributes(feature);
+        selectedFeaturesJSON[layerNameToTitleMap[layer]].push(attributes)
+      });
+    });
     document.getElementById('features').innerHTML = createFeatureTreeHTML(selectedFeaturesJSON);
 }
 
@@ -712,12 +725,17 @@ function filterAttributes(feature) {
     return filteredAttributes;
 }
 
-function renderJSON(obj) {
+function renderJSON(objList) {
     var retValue = "";
-    for (var key in obj) {
+    for (var i = 0; i < objList.length; i++) {
+      var obj = objList[i];
+      for (var key in obj) {
         if (key.startsWith("__"))
             continue;
         retValue += "<div class='tree-node'>" + key + " : " + obj[key] + "</div>";
+      }
+      if (i !== objList.length - 1)
+	retValue += "<hr class='separator'>"
     }
     return retValue;
 }

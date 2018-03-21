@@ -389,3 +389,8 @@
 .expanded {
     display: block !important;
 }
+
+.separator {
+    margin: 2%;
+    border-top: 1px solid black;
+}
