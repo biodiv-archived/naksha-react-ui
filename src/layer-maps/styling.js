@@ -20,11 +20,12 @@ var initial_zoom = null;
 var map = null;
 // var gmap = null;
 
-function initMap() {
+function initMap(props) {
+
     var india_center = {lat: 25, lng: 77};
     var zoom = 3;
     // var gZoom = zoom + 1; // Google zoom levels are one higher than mapboxgl
-    initMapboxglMap(india_center, zoom);
+    initMapboxglMap(india_center, zoom, props);
     // initGoogleMap(india_center, gZoom);
     // SyncGoogleAndMapboxglMaps(map, gmap);
     populateLayerPanel();
@@ -39,14 +40,25 @@ function initGoogleMap(center, zoom) {
     })
 }
 
-function initMapboxglMap(center, zoom) {
-    mapboxgl.accessToken = Config.mapboxgl_access_token;
-    map = new mapboxgl.Map({
+function initMapboxglMap(center, zoom, props) {
+    mapboxgl.accessToken = 'pk.eyJ1IjoicHJpeWFuc2h1LWEiLCJhIjoiY2phMmQ1bTFvNzRjZDMzcGdiNmQ5a3k5YSJ9.cpBkEIu8fQFAgx1cYuTQVg';
+	var initialBounds = props.softBounds //[[92, 10], [102, 29]];
+	var hardBounds = props.hardBounds//[[80,5],[105,40]];
+	map = new mapboxgl.Map({
           container: 'map',
-          center: [center.lng, center.lat],
-          zoom: zoom,
-          style: 'mapbox://styles/mapbox/basic-v9' //india_boundary
+          //center: [center.lng, center.lat],
+          //zoom: zoom,
+          style: 'mapbox://styles/mapbox/basic-v9', //india_boundary
+	      hash: true
         });
+
+	if(hardBounds !== null){
+		map.fitBounds(hardBounds, {linear: true, duration: 0});
+		map.setMaxBounds(map.getBounds());
+	}
+
+	if(initialBounds !== null)
+		map.fitBounds(initialBounds, {linear: true, duration: 0});
 
     map.on('load', function() {
       IndiaBoundaries(map)

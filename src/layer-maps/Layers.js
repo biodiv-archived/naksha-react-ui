@@ -8,7 +8,7 @@ var initMap = styling.default.initMap
 
 class Layers extends Component {
   componentDidMount() {
-    initMap();
+    initMap(this.props);
   }
   render() {
     return (
