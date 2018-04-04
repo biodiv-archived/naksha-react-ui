@@ -52,13 +52,14 @@ function initMapboxglMap(center, zoom, props) {
 	      hash: true
         });
 
-	if(hardBounds !== null){
+	if(hardBounds){
 		map.fitBounds(hardBounds, {linear: true, duration: 0});
 		map.setMaxBounds(map.getBounds());
 	}
 
-	if(initialBounds !== null)
+	if(initialBounds){
 		map.fitBounds(initialBounds, {linear: true, duration: 0});
+	}
 
     map.on('load', function() {
       IndiaBoundaries(map)
