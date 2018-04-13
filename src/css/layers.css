@@ -172,6 +172,7 @@
 
 /* Style the buttons that are used to open the tab content */
 .tab button {
+	height: 100%;
     background-color: inherit;
     float: left;
     border: none;
@@ -394,3 +395,55 @@
     margin: 2%;
     border-top: 1px solid black;
 }
+
+/*---------------- New layer Panel ----------------------*/
+.add-layer-panel {
+	margin: 2%;
+}
+
+.grey-border {
+	padding: 1%;
+	border: solid 1px #ababab;
+}
+
+#metadata-component {
+	padding-top: 2%;
+}
+
+#metadata-component table, th, td {
+	border: none;
+}
+
+#metadata-component input {
+	width: 100%;
+}
+
+.dbf-table {
+	width: 100%;
+	overflow-x: auto;
+}
+
+.dbf-table table {
+	border: 1px solid black;
+	border-collapse: collapse;
+}
+
+.dbf-table th {
+	border: 1px solid black;
+	border-collapse: collapse;
+}
+
+.dbf-table td {
+	border: 1px solid black;
+	border-collapse: collapse;
+}
+
+.submit-btn {
+	display: block;
+	margin: 1% auto 0 auto;
+}
+
+th {
+	padding: 15px;
+}
+/*-------------------------------------------------------*/
