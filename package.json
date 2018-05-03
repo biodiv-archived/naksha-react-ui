@@ -32,10 +32,12 @@
     "geohash": "0.0.1",
     "google-maps": "^3.2.1",
     "mapbox-gl": "^0.44.0",
+    "pikaday": "^1.7.0",
     "react": "^16.2.0",
     "react-collapsible": "^2.0.3",
     "react-dom": "^16.2.0",
-    "react-scripts": "1.0.17"
+    "react-scripts": "1.0.17",
+    "shapefile": "^0.6.6"
   },
   "devDependencies": {
     "babel-cli": "^6.26.0",
