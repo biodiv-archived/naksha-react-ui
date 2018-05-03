@@ -15,18 +15,24 @@ function init(params) {
 function createAddLayersPanel(){
 	var html =  "<div class=add-layer-panel>"
 				+ "<label>Please select input type</label><br>"
-				+ "<input type='radio' name='fileType' value='shape' onChange='setDataUploadType(this.value)'> Shape File"
+				+ "<input type='radio' name='fileType' value='shape' onChange='setDataUploadType(this.value)' checked=true> Shape File"
 				+ "<input type='radio' name='fileType' value='raster' onChange='setDataUploadType(this.value)'> Raster File<br><br>"
 				+ "<div id='shape-file-data' class='grey-border'>"
 				+   "<label>Select shape file   </label>"
 				+   "<input type='file' id='inputShpFiles' name='files[]'><br><br>"
 				+   "<label>Select dbf file   </label>"
-				+   "<input type='file' id='inputDbfFiles' name='files[]'><br><br>"
-				+   "<input type='submit' class='' id='upload-submit' value='Go!' onclick='displayShapeDataForm()'>"
+				+   "<input type='file' id='inputVectorDbfFiles' name='files[]'><br><br>"
+				+   "<input type='submit' class='' id='upload-submit-shape' value='Go!' onclick='displayShapeDataForm()'>"
 				+   "<br><br>"
-				+   "<div id='dbf-data-table' class='dbf-table'></div>"
+				+   "<div id='dbf-data-table-div' class='dbf-table'></div>"
 				+ "</div>"
 				+ "<div id='raster-file-data' class='hide grey-border'>"
+				+   "<label>Select tiff file   </label>"
+				+   "<input type='file' id='inputTiffFiles' name='files[]'><br><br>"
+				+   "<label>Select dbf file   </label>"
+				+   "<input type='file' id='inputRasterDbfFiles' name='files[]'><br><br>"
+				+   "<input type='submit' class='' id='upload-submit-raster' value='Go!' onclick='displayRasterDataForm()'>"
+				+   "<br><br>"
 				+ "</div>"
 				+ "</div>"
 
@@ -34,11 +40,17 @@ function createAddLayersPanel(){
 }
 
 function displayShapeDataForm() {
-	var isSuccess = handleFileSelect(addMetadataComponent);
+	handleShapeFileSelect(addMetadataComponent);
+}
+
+function displayRasterDataForm() {
+	document.getElementById('upload-submit-raster').classList.add('hide');
+	handleRasterFileSelect();
+	addMetadataComponent(null);
 }
 
 /*function displayShapeDataForm() {
-	var pr = new Promise(handleFileSelect)
+	var pr = new Promise(handleShapeFileSelect)
 		.then(function(){
 			addMetadataComponent();
 		);
@@ -47,28 +59,39 @@ function displayShapeDataForm() {
 
 function addMetadataComponent(col_names) {
 	console.log('adding metadata component');
+	var dataType = document.querySelector('input[name="fileType"]:checked').value
 	var html = "<div id='metadata-component'>"
-	var styleColumnHtml = "<select id='default_style_column'>"
-	col_names.forEach(function(column) {
-		styleColumnHtml += "<option value='" + column + "'>" + column + "</option>"
-	})
-	styleColumnHtml += "</select>";
-
+	var styleColumnHtml = ""
+	if (col_names) {
+		styleColumnHtml = "<tr><td data-name='default_style_by'>Default Styling Column</td><td>"
+							+ "<select id='default_style_column'>"
+		col_names.forEach(function(column) {
+			styleColumnHtml += "<option value='" + column + "'>" + column + "</option>"
+		})
+		styleColumnHtml += "</select>" + "</td></tr>";
+	}
 	var detailsHtml = "<table id='metadata_table'>"
-					+ "<tr><td>Default Styling Column</td><td>" + styleColumnHtml + "</td></tr>"
-					+ "<tr><td>Layer Name</td><td><input/></td></tr>"
-					+ "<tr><td>Layer Description</td><td><textarea style='width:100%' rows='5' cols='50'></textarea></td></tr>"
-					+ "<tr><td>Contributor</td><td><input/></td></tr>"
-					+ "<tr><td>Attribution</td><td><input/></td></tr>"
-					+ "<tr><td>License</td><td>"
+					+ styleColumnHtml
+					+ "<tr><td data-name='layer_name'>Layer Name</td><td><input/></td></tr>"
+					+ "<tr><td data-name='layer_description'>Layer Description</td><td><textarea style='width:100%' rows='5' cols='50'></textarea></td></tr>"
+
+	if (dataType === "shape") {
+		detailsHtml += "<tr><td data-name='layer_type'>Layer Type</td><td>"
+					+ getLayerTypeSelector()
+					+ "</td></tr>"
+	}
+	
+	detailsHtml		+= "<tr><td data-name='created_by'>Contributor</td><td><input/></td></tr>"
+					+ "<tr><td data-name='attribution'>Attribution</td><td><input/></td></tr>"
+					+ "<tr><td data-name='license'>License</td><td>"
 					+   getLicenseSelector()
 					+ "</td></tr>"
-					+ "<tr><td>Data Curation Date</td><td><input id='curation_date_picker'></td></tr>"
+					+ "<tr><td data-name='created_date'>Data Curation Date</td><td><input id='curation_date_picker'></td></tr>"
 					+ "<table>"
 	//html += "<label>Default styling column   </label>" + styleColumnHtml;
 	html += detailsHtml
 	html += "</div>"
-	document.getElementById('shape-file-data').insertAdjacentHTML('beforeend', html);
+	document.getElementById(dataType + '-file-data').insertAdjacentHTML('beforeend', html);
 
 	// add date picker on curation date picker element
 	var maxDate = new Date(); // current date
@@ -78,17 +101,27 @@ function addMetadataComponent(col_names) {
 			maxDate: maxDate,
 			yearRange: yearRange
 		});
-	addSubmitButton()
+	addSubmitButton(dataType)
 }
 
-function addSubmitButton() {
+function addSubmitButton(dataType) {
 	var html =  "<button id='shape_submit_btn' class='submit-btn' onClick='uploadFiles()'>Upload</button>";
-	document.getElementById('shape-file-data').insertAdjacentHTML('beforeend', html);
+	document.getElementById(dataType + '-file-data').insertAdjacentHTML('beforeend', html);
 }
 
 function getLicenseSelector() {
 	var html = "<select>"
 	var licenseOptions = ["CC-BY", "CC-HI"];
+	licenseOptions.forEach(function(lic) {
+		html += "<option value='" + lic + "'>" + lic + "</option>"
+	})
+	html += "</select>"
+	return html;
+}
+
+function getLayerTypeSelector() {
+	var html = "<select>"
+	var licenseOptions = ["POINT", "MULTIPOINT", "MULTILINESTRING", "MULTIPOLYGON"];
 	licenseOptions.forEach(function(lic) {
 		html += "<option value='" + lic + "'>" + lic + "</option>"
 	})
@@ -107,9 +140,9 @@ function setDataUploadType(type) {
 	}
 }
 
-function handleFileSelect(callback) {
+function handleShapeFileSelect(callback) {
 	var shpFiles = document.getElementById('inputShpFiles').files; // FileList object
-	var dbfFiles = document.getElementById('inputDbfFiles').files;
+	var dbfFiles = document.getElementById('inputVectorDbfFiles').files;
 	if (shpFiles.length === 0) {
 		alert ('Please select a shape file.');
 		return false;
@@ -118,6 +151,9 @@ function handleFileSelect(callback) {
 		alert ('Please select a dbf file');
 		return false;
 	}
+	
+	// hide the 'Go!' button
+	document.getElementById('upload-submit-shape').classList.add('hide');
 
 	var shpReader = new FileReader();
 	var dbfReader = new FileReader();
@@ -130,10 +166,23 @@ function handleFileSelect(callback) {
 	return true;
 }
 
+function handleRasterFileSelect() {
+	var tiffFiles = document.getElementById('inputTiffFiles').files; // FileList object
+	var dbfFiles = document.getElementById('inputRasterDbfFiles').files;
+	if (tiffFiles.length === 0) {
+		alert ('Please select a TIFF file.');
+		return false;
+	}
+	if (dbfFiles.length === 0) {
+		alert ('Please select a dbf file');
+		return false;
+	}
+}
+
 function createDataTable(source, callback) {
 	var fixed_col_html = getFixedColumnHTML();
 	var row_count = 0;
-	var table_html = "<table>";
+	var table_html = "<table id='dbf-data-table'>";
 
 	source.read().then(function(result){
 		var col_names = Object.keys(result.value);
@@ -163,7 +212,7 @@ function createDataTable(source, callback) {
 				table_html += getAdditionalRows(col_names);
 				table_html += "</table>"
 				console.log('finished creating table');
-				document.getElementById('dbf-data-table').innerHTML = "<div>"
+				document.getElementById('dbf-data-table-div').innerHTML = "<div>"
 																	//+ fixed_col_html
 																	+ "</div>"
 																	+ "<div>"
@@ -181,8 +230,10 @@ function createDataTable(source, callback) {
 function getAdditionalRows(columns) {
 	// add radio button row to select title column
 	var html = "<tr>"
+	var checked = "checked";
 	columns.forEach(function(col) {
-		html += "<td style='text-align:center'><input type='radio' name='titleColumn' value='" + col + "'></td>"
+		html += "<td style='text-align:center'><input type='radio' " + checked + " name='titleColumn' value='" + col + "'></input></td>"
+		checked = "";
 	})
 	html += "</tr>"
 
@@ -209,19 +260,96 @@ function getFixedColumnHTML() {
 }
 
 function uploadFiles() {
+	var metadata_json = {};
+	var dataType = document.querySelector('input[name="fileType"]:checked').value;
+
+	if (dataType == 'shape') {
+		var title_column = document.querySelector('input[name="titleColumn"]:checked').value
+		var summary_columns = document.querySelectorAll('input[name="summaryColumn"]:checked')
+		var summary_columns_names = []
+		summary_columns.forEach(function(col){
+			summary_columns_names.push(col.value)
+		})
+
+		metadata_json['title_column'] = title_column;
+		metadata_json['summary_columns'] = summary_columns_names;
+	}
+
+	
 	var meta_table = document.getElementById('metadata_table');
 	var num_rows = meta_table.rows.length;
 	for (var i = 0; i < num_rows; i++) {
+		var keyCells = meta_table.rows[i].cells[0]
 		var objCells = meta_table.rows[i].cells[1].children[0];
+		metadata_json[keyCells.getAttribute('data-name')] = objCells.value;
 		console.log(objCells.value);
 	}
+	console.log('metadata', metadata_json);
+
+	var data = new FormData();
+	if (dataType === 'shape') {
+		var shpFile = document.getElementById('inputShpFiles').files[0];
+		metadata_json['layer_tablename'] = shpFile.name.replace(".shp", "");
+		data.append('shp', shpFile);
+		data.append('dbf', document.getElementById('inputVectorDbfFiles').files[0]);
+	}
+	else if (dataType === 'raster') {
+		var tiffFile = document.getElementById('inputTiffFiles').files[0];
+		metadata_json['layer_tablename'] = tiffFile.name.replace(".tiff", "");
+		data.append('raster', tiffFile);
+		data.append('dbf', document.getElementById('inputRasterDbfFiles').files[0])
+	}
+
+	metadata_json['status'] = 1;
+	data.append('metadata', createMetadataFile(dataType, metadata_json));
+	var url = "http://" + Config.geoserver_path + "/naksha/geoserver/uploadshp";
+	console.log(url);
+	var xhr = new XMLHttpRequest();
+	var xmlHttp = new XMLHttpRequest();
+	xmlHttp.open("POST", url, true);
+	xmlHttp.send(data);
+
+}
+
+/*function WriteToFile(passForm) { 
+		set fso = CreateObject("Scripting.FileSystemObject"); 
+	set s = fso.CreateTextFile("C:\test.txt", True); 
+	s.writeline("HI"); 
+	s.writeline("Bye"); 
+	s.writeline("-----------------------------"); 
+	s.Close(); 
+}*/
+
+function createMetadataFile(dataType, metadata_json) {
+	var content = "";
+	content += "*Meta_Layer\n";
+	for (var key in metadata_json) {
+		content += key + " : " + metadata_json[key] + "\n";
+	}
+
+
+	content += "\n$Layer_Column_Description\n";
+	if (dataType === "shape") {
+		var dataTable = document.getElementById('dbf-data-table');
+		var col_names = dataTable.rows[0];
+		var col_names_desc = dataTable.rows[1];
+		var num_cols = col_names.childElementCount;
+		for (var i = 0; i < num_cols; i++) {
+			content += col_names.cells[i].textContent + " : " + col_names_desc.cells[i].children[0].value + "\n";
+		}
+	}
+
+	console.log(content);
+	return new Blob([content], {type:'text/plain'});
+
 }
 
 export default {
 	init: init
 }
 
-window.handleFileSelect      		=handleFileSelect
+window.handleShapeFileSelect   		=handleShapeFileSelect
 window.setDataUploadType			=setDataUploadType
 window.displayShapeDataForm			=displayShapeDataForm
 window.uploadFiles					=uploadFiles
+window.displayRasterDataForm		=displayRasterDataForm
