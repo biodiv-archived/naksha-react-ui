@@ -3,10 +3,10 @@ import './css/legend.css';
 import './css/mapbox-gl.css';
 import './css/layers.css';
 import './css/pikaday.css';
-import './css/site.css'
+//import './css/site.css'
 import './css/style.json'
-import './css/theme.css'
-import './css/triangle.css'
+//import './css/theme.css'
+//import './css/triangle.css'
 import MapHolder from './MapHolder';
 import Layers from './layer-maps/Layers';
 import NewLayerComponent from './layer-maps/NewLayerComponent'
