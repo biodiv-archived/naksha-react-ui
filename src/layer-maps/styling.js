@@ -3,7 +3,7 @@ import Config from '../common/config.js'
 var mapboxgl = require('mapbox-gl')
 var GoogleMapsLoader = require('google-maps')
 
-var baseUrl = "https://" + get_host() + "/naksha/geoserver/"
+var baseUrl = null
 var workspace_name = 'biodiv'
 var thumbnailsUrl = baseUrl + "thumbnails/";
 
@@ -22,6 +22,7 @@ var map = null;
 
 function initMap(props) {
 
+    baseUrl = "https://" + props.contextUrl + "/naksha/geoserver/"
     var india_center = {lat: 25, lng: 77};
     var zoom = 3;
     // var gZoom = zoom + 1; // Google zoom levels are one higher than mapboxgl
@@ -144,10 +145,6 @@ function SyncGoogleAndMapboxglMaps(map, gmap){
         sync_map_move(map, gmap);
     })
 
-}
-
-function get_host(){
-    return Config.geoserver_path;
 }
 
 function getWorkspace() {
@@ -583,7 +580,7 @@ function filterOutMapboxFeatures(features) {
 	  continue;
 	retFeatures.push(features[i]);
     }
-    return retFeatures; 
+    return retFeatures;
 }
 
 function showClickedFeature(event) {

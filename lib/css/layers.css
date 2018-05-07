@@ -42,6 +42,7 @@
 	position: relative;
 	top: 0%;
 	right: 0;
+	left: 0.5%;
 	width: 30%;
 	transform: translate(43%, 0px);
 	transition: all 0.5s ease-out;
@@ -171,6 +172,7 @@
 
 /* Style the buttons that are used to open the tab content */
 .tab button {
+	height: 100%;
     background-color: inherit;
     float: left;
     border: none;
@@ -289,7 +291,7 @@
 	position: relative;
 	z-index: 10; /* This should always be higher than mapbox-gl map canvas*/
 	float: right;
-    	margin: 1% 4% 0 0;
+    	margin: 1% 4.5% 0 0;
     	height: 2em;
 }
 
@@ -381,5 +383,67 @@
 
 .mapboxgl-ctrl-top-right {
     top: 8% !important;
+    right: 4% !important;
     right: 0;
 }
+
+.expanded {
+    display: block !important;
+}
+
+.separator {
+    margin: 2%;
+    border-top: 1px solid black;
+}
+
+/*---------------- New layer Panel ----------------------*/
+.add-layer-panel {
+	margin: 2%;
+}
+
+.grey-border {
+	padding: 1%;
+	border: solid 1px #ababab;
+}
+
+#metadata-component {
+	padding-top: 2%;
+}
+
+#metadata-component table, th, td {
+	border: none;
+}
+
+#metadata-component input {
+	width: 100%;
+}
+
+.dbf-table {
+	width: 100%;
+	overflow-x: auto;
+}
+
+.dbf-table table {
+	border: 1px solid black;
+	border-collapse: collapse;
+}
+
+.dbf-table th {
+	border: 1px solid black;
+	border-collapse: collapse;
+}
+
+.dbf-table td {
+	border: 1px solid black;
+	border-collapse: collapse;
+}
+
+.submit-btn {
+	display: block;
+	margin: 1% auto 0 auto;
+}
+
+th {
+	padding: 15px;
+}
+/*-------------------------------------------------------*/
