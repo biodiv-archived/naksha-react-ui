@@ -802,7 +802,6 @@ export default {
 window.initMap                     =initMap
 window.initGoogleMap               =initGoogleMap
 window.initMapboxglMap             =initMapboxglMap
-window.get_host                    =get_host
 window.getWorkspace                =getWorkspace
 window.get_map_style               =get_map_style
 window.set_map_style               =set_map_style
