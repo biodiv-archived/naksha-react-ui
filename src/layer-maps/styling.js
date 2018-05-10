@@ -5,7 +5,7 @@ var GoogleMapsLoader = require('google-maps')
 
 var baseUrl = null
 var workspace_name = 'biodiv'
-var thumbnailsUrl = baseUrl + "thumbnails/";
+var thumbnailsUrl = null
 
 var current_selected_layer = null;
 var current_selected_style = null;
@@ -23,6 +23,7 @@ var map = null;
 function initMap(props) {
 
     baseUrl = "https://" + props.contextUrl + "/naksha/geoserver/"
+	thumbnailsUrl = baseUrl + "thumbnails/";
     var india_center = {lat: 25, lng: 77};
     var zoom = 3;
     // var gZoom = zoom + 1; // Google zoom levels are one higher than mapboxgl
