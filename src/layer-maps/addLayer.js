@@ -2,10 +2,12 @@ import Config from '../common/config.js'
 var shapefile = require('shapefile');
 var Pikaday = require('pikaday');
 
+var props = null;
 var root_container;
 const MAX_ROW_COUNT = 5;
 
 function init(params) {
+    props = params;
 	root_container = document.getElementById('add-layer-component');
 	root_container.innerHTML = createAddLayersPanel();
 }
@@ -302,7 +304,7 @@ function uploadFiles() {
 
 	metadata_json['status'] = 1;
 	data.append('metadata', createMetadataFile(dataType, metadata_json));
-	var url = "http://" + Config.geoserver_path + "/naksha/geoserver/uploadshp";
+	var url = "https://" + props.contextUrl + "/naksha/geoserver/uploadshp";
 	console.log(url);
 	var xhr = new XMLHttpRequest();
 	var xmlHttp = new XMLHttpRequest();

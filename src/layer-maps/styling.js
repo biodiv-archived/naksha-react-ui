@@ -18,10 +18,11 @@ var layerToStyleOptionsMap = {};
 var initial_zoom = null;
 
 var map = null;
+var map_props = null;
 // var gmap = null;
 
 function initMap(props) {
-
+    map_props = props;
     baseUrl = "https://" + props.contextUrl + "/naksha/geoserver/"
 	thumbnailsUrl = baseUrl + "thumbnails/";
     var india_center = {lat: 25, lng: 77};
@@ -445,9 +446,30 @@ function zoomToExtent(Bbox) {
     var miny = Number(coord[1]);
     var maxx = Number(coord[2]);
     var maxy = Number(coord[3]);
-    //console.log(minx, miny, maxx, maxy);
-    //console.log(minx+miny);
-    map.fitBounds([[minx, miny],[maxx, maxy]]);
+    var BboxArray = [[minx, miny],[maxx, maxy]]
+    var finalBBox = getIntersectionWithHardBounds(BboxArray);
+    if (finalBBox)
+        map.fitBounds(finalBBox);
+}
+
+function getIntersectionWithHardBounds(Bbox) {
+    var hardBounds = map_props.hardBounds
+    if (hardBounds == undefined)
+        return Bbox;
+
+    var left = Math.max(Bbox[0][0], hardBounds[0][0]);
+    var right = Math.min(Bbox[1][0], hardBounds[1][0]);
+
+    if (left > right) // no intersection
+        return null;
+
+    var down = Math.max(Bbox[0][1], hardBounds[0][1]);
+    var up = Math.min(Bbox[1][1], hardBounds[1][1]);
+
+    if (down > up) // no intersection
+        return null;
+
+    return [[left, down],[right, up]];
 }
 
 function addLayerToSelectedTab(layerName, layerTitle, layerBbox, all_styles, style){
