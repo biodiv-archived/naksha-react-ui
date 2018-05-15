@@ -712,10 +712,12 @@ function highlightSelectedFeature(layerToFeatures) {
 	if (layerType === 'fill'){
 	  _type = 'line';
 	  _paint = {'line-width': 1, 'line-color': 'red'};
-	}
-	else if (layerType === 'circle'){
+	} else if (layerType === 'circle'){
 	  _type = 'circle';
 	  _paint = {'circle-opacity': 0, 'circle-stroke-width': 1, 'circle-stroke-color': 'red'}
+	} else if (layerType === 'line'){
+		// no highlight needed for line type layers
+		return;
 	}
 
 
