@@ -24,7 +24,7 @@ var map_props = null;
 function initMap(props) {
     map_props = props;
     baseUrl = "https://" + props.contextUrl + "/naksha/geoserver/"
-	thumbnailsUrl = baseUrl + "thumbnails/";
+    thumbnailsUrl = baseUrl + "thumbnails/";
     var india_center = {lat: 25, lng: 77};
     var zoom = 3;
     // var gZoom = zoom + 1; // Google zoom levels are one higher than mapboxgl
@@ -46,7 +46,8 @@ function initGoogleMap(center, zoom) {
 function initMapboxglMap(center, zoom, props) {
     mapboxgl.accessToken = 'pk.eyJ1IjoicHJpeWFuc2h1LWEiLCJhIjoiY2phMmQ1bTFvNzRjZDMzcGdiNmQ5a3k5YSJ9.cpBkEIu8fQFAgx1cYuTQVg';
 	var initialBounds = props.softBounds //[[92, 10], [102, 29]];
-	var hardBounds = props.hardBounds//[[80,5],[105,40]];
+	var hardBounds = props.hardBounds //[[80,5],[105,40]];
+	var groupName = props.groupName;
 	map = new mapboxgl.Map({
           container: 'map',
           //center: [center.lng, center.lat],
@@ -64,6 +65,10 @@ function initMapboxglMap(center, zoom, props) {
 		map.fitBounds(initialBounds, {linear: true, duration: 0});
 	}
 
+	if (groupName) {
+		addStateBoundaryLayer(map, groupName);
+	}
+
     map.on('load', function() {
       IndiaBoundaries(map)
     })
@@ -75,6 +80,40 @@ function initMapboxglMap(center, zoom, props) {
         showClickedFeature(e);
     });
 }
+
+function addStateBoundaryLayer(map, groupName) {
+	var state = null;
+	if (groupName === "assambiodiversity")
+		state = "ASSAM";
+
+	if (state) {
+		var LAYER_NAME = 'group-state-boundary';
+		var source = {
+			"type": "vector",
+			"scheme": "tms",
+			"tiles": [baseUrl + "gwc/service/tms/1.0.0/biodiv:lyr_116_india_states/{z}/{x}/{y}"]
+		};
+		var layer = {
+			"id": LAYER_NAME,
+			"type": "line",
+			"source": LAYER_NAME,
+			"source-layer": "lyr_116_india_states",
+			"paint": {
+				"line-width": 2,
+				"line-color": "#000000"
+			},
+			"filter": ['in', 'state', state]
+
+		};
+		map.on('load', function(){
+		  map.addSource(LAYER_NAME, source);
+		  console.log(map);
+		  map.addLayer(layer);
+		  console.log(map);
+		})
+	}
+}
+
 
 function addBaseLayerSelector() {
     var base_layers = [
