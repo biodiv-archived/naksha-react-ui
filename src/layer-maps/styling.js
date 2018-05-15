@@ -12,6 +12,7 @@ var current_selected_style = null;
 
 var map_style = null;
 var active_layers = [];
+var fixed_layers = [];
 var layerNameToTitleMap = {};
 var layerToStyleOptionsMap = {};
 
@@ -111,6 +112,7 @@ function addStateBoundaryLayer(map, groupName) {
 		  map.addLayer(layer);
 		  console.log(map);
 		})
+		fixed_layers.push(LAYER_NAME);
 	}
 }
 
@@ -460,23 +462,18 @@ function add_layer_to_map(layerName, layerTitle, layerBbox){
 }
 
 function append_new_style(style){
-    /*if(get_map_style == null || get_map_style == {}){
-        // if no style is currently present
-        set_map_style(style);
-    }
-    else{*/
-
-        Object.keys(style.sources).forEach(function(key){
-            // if (!map.isSourceLoaded(key))
-		//style.sources[key].tiles = [style.sources[key].tiles[0].replace('6792', '8080')];
+    Object.keys(style.sources).forEach(function(key){
 		style.sources[key].tiles = [baseUrl + "gwc/service/tms/1.0.0/" + getWorkspace() + ":" + style.layers[0].id + "/{z}/{x}/{y}"];
-		//style.sources[key].tiles = ["http://" + get_host() + "/" + style.sources[key].tiles[0]];
-                map.addSource(key, style.sources[key]);
-        })
-        style.layers.forEach(function(layer){
-            map.addLayer(layer)
-        })
-    // }
+        map.addSource(key, style.sources[key]);
+    })
+
+    var topLayer = null;
+    if (fixed_layers.length > 0)
+        topLayer = fixed_layers[0];
+
+    style.layers.forEach(function(layer){
+        map.addLayer(layer, topLayer)
+    })
 }
 
 function zoomToExtent(Bbox) {
