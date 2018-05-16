@@ -65,7 +65,7 @@ function addMetadataComponent(col_names) {
 	var html = "<div id='metadata-component'>"
 	var styleColumnHtml = ""
 	if (col_names) {
-		styleColumnHtml = "<tr><td data-name='default_style_by'>Default Styling Column</td><td>"
+		styleColumnHtml = "<tr><td data-name='color_by'>Default Styling Column</td><td>"
 							+ "<select id='default_style_column'>"
 		col_names.forEach(function(column) {
 			styleColumnHtml += "<option value='" + column + "'>" + column + "</option>"
@@ -266,11 +266,11 @@ function uploadFiles() {
 	var dataType = document.querySelector('input[name="fileType"]:checked').value;
 
 	if (dataType == 'shape') {
-		var title_column = document.querySelector('input[name="titleColumn"]:checked').value
+		var title_column = "'" + document.querySelector('input[name="titleColumn"]:checked').value + "'";
 		var summary_columns = document.querySelectorAll('input[name="summaryColumn"]:checked')
 		var summary_columns_names = []
 		summary_columns.forEach(function(col){
-			summary_columns_names.push(col.value)
+			summary_columns_names.push("'" + col.value + "'")
 		})
 
 		metadata_json['title_column'] = title_column;
@@ -283,7 +283,12 @@ function uploadFiles() {
 	for (var i = 0; i < num_rows; i++) {
 		var keyCells = meta_table.rows[i].cells[0]
 		var objCells = meta_table.rows[i].cells[1].children[0];
-		metadata_json[keyCells.getAttribute('data-name')] = objCells.value;
+		var key = keyCells.getAttribute('data-name');
+		var value = objCells.value;
+		if (key === 'color_by')
+			value = "'" + value + "'"
+
+		metadata_json[keyCells.getAttribute('data-name')] = value;
 		console.log(objCells.value);
 	}
 	console.log('metadata', metadata_json);
