@@ -22,6 +22,8 @@ function createAddLayersPanel(){
 				+ "<div id='shape-file-data' class='grey-border'>"
 				+   "<label>Select shape file   </label>"
 				+   "<input type='file' id='inputShpFiles' name='files[]'><br><br>"
+				+   "<label>Select shx file   </label>"
+				+   "<input type='file' id='inputShxFiles' name='files[]'><br><br>"
 				+   "<label>Select dbf file   </label>"
 				+   "<input type='file' id='inputVectorDbfFiles' name='files[]'><br><br>"
 				+   "<input type='submit' class='' id='upload-submit-shape' value='Go!' onclick='displayShapeDataForm()'>"
@@ -144,9 +146,14 @@ function setDataUploadType(type) {
 
 function handleShapeFileSelect(callback) {
 	var shpFiles = document.getElementById('inputShpFiles').files; // FileList object
+	var shxFiles = document.getElementById('inputShxFiles').files; // FileList object
 	var dbfFiles = document.getElementById('inputVectorDbfFiles').files;
 	if (shpFiles.length === 0) {
 		alert ('Please select a shape file.');
+		return false;
+	}
+	if (shxFiles.length === 0) {
+		alert ('Please select a shx file.');
 		return false;
 	}
 	if (dbfFiles.length === 0) {
@@ -298,6 +305,7 @@ function uploadFiles() {
 		var shpFile = document.getElementById('inputShpFiles').files[0];
 		metadata_json['layer_tablename'] = shpFile.name.replace(".shp", "");
 		data.append('shp', shpFile);
+		data.append('shx', document.getElementById('inputShxFiles').files[0]);
 		data.append('dbf', document.getElementById('inputVectorDbfFiles').files[0]);
 	}
 	else if (dataType === 'raster') {
