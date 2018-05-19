@@ -397,6 +397,10 @@
 }
 
 /*---------------- New layer Panel ----------------------*/
+#add-layer-component {
+    background-color: white;
+}
+
 .add-layer-panel {
 	margin: 2%;
 }
