@@ -87,6 +87,7 @@ function addMetadataComponent(col_names) {
 	
 	detailsHtml		+= "<tr><td data-name='created_by'>Contributor</td><td><input/></td></tr>"
 					+ "<tr><td data-name='attribution'>Attribution</td><td><input/></td></tr>"
+					+ "<tr><td data-name='tags'>Tags</td><td><input/></td></tr>"
 					+ "<tr><td data-name='license'>License</td><td>"
 					+   getLicenseSelector()
 					+ "</td></tr>"
@@ -241,7 +242,7 @@ function getAdditionalRows(columns) {
 	var html = "<tr>"
 	var checked = "checked";
 	columns.forEach(function(col) {
-		html += "<td style='text-align:center'><input type='radio' " + checked + " name='titleColumn' value='" + col + "'></input></td>"
+		html += "<td style='text-align:center'><input type='radio' " + checked + " name='titleColumn' value='" + col + "'>Title Column</input></td>"
 		checked = "";
 	})
 	html += "</tr>"
@@ -249,7 +250,7 @@ function getAdditionalRows(columns) {
 	// add checkbox row to select summary columns
 	html += "<tr>"
 	columns.forEach(function(col) {
-		html += "<td style='text-align:center'><input type='checkbox' name='summaryColumn' value='" + col + "'></td>"
+		html += "<td style='text-align:center'><input type='checkbox' name='summaryColumn' value='" + col + "'>Summary Column</td>"
 	})
 	html += "</tr>"
 	return html;
@@ -303,14 +304,14 @@ function uploadFiles() {
 	var data = new FormData();
 	if (dataType === 'shape') {
 		var shpFile = document.getElementById('inputShpFiles').files[0];
-		metadata_json['layer_tablename'] = shpFile.name.replace(".shp", "");
+		metadata_json['layer_tablename'] = shpFile.name.replace(".shp", "").toLowerCase();
 		data.append('shp', shpFile);
 		data.append('shx', document.getElementById('inputShxFiles').files[0]);
 		data.append('dbf', document.getElementById('inputVectorDbfFiles').files[0]);
 	}
 	else if (dataType === 'raster') {
 		var tiffFile = document.getElementById('inputTiffFiles').files[0];
-		metadata_json['layer_tablename'] = tiffFile.name.replace(".tiff", "");
+		metadata_json['layer_tablename'] = tiffFile.name.replace(".tiff", "").toLowerCase();
 		data.append('raster', tiffFile);
 		data.append('dbf', document.getElementById('inputRasterDbfFiles').files[0])
 	}
@@ -319,11 +320,18 @@ function uploadFiles() {
 	data.append('metadata', createMetadataFile(dataType, metadata_json));
 	var url = "https://" + props.contextUrl + "/naksha/geoserver/uploadshp";
 	console.log(url);
-	var xhr = new XMLHttpRequest();
 	var xmlHttp = new XMLHttpRequest();
+	xmlHttp.onreadystatechange = function() {
+            if (xmlHttp.readyState === 4){
+		document.getElementById('upload-loader').style.display = 'none';
+        	alert(xmlHttp.response);
+            }
+	}
 	xmlHttp.open("POST", url, true);
 	xmlHttp.send(data);
-
+	document.getElementById('shape_submit_btn').disabled = true;
+	document.getElementById('shape_submit_btn').style.opacity = 0.5;
+	document.getElementById('add-layer-component').insertAdjacentHTML('beforeend', '<div id="upload-loader" class="loader"></div>');
 }
 
 /*function WriteToFile(passForm) { 
