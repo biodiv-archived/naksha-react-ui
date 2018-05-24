@@ -207,7 +207,6 @@ function createDataTable(source, callback) {
 			table_html += "<td><input value='" + col + "'></input></td>"
 		})
 		table_html += "</tr>"
-		
 		// contruct table rows
 		function addRow(result1) {
 			table_html += "<tr>"
@@ -216,9 +215,10 @@ function createDataTable(source, callback) {
 			})
 			table_html += "</tr>";
 			row_count += 1;
-			if (!result1.done && row_count < MAX_ROW_COUNT)
-				source.read().then(addRow);
-			else {
+			source.read().then(function(res) {
+			    if (!res.done && row_count < MAX_ROW_COUNT)
+				addRow(res);
+			    else {
 				table_html += getAdditionalRows(col_names);
 				table_html += "</table>"
 				console.log('finished creating table');
@@ -229,7 +229,8 @@ function createDataTable(source, callback) {
 																	+ table_html
 																	+ "</div>";
 				callback(col_names);
-			}
+			    }
+			});
 		}
 
 		addRow(result);
@@ -322,10 +323,16 @@ function uploadFiles() {
 	console.log(url);
 	var xmlHttp = new XMLHttpRequest();
 	xmlHttp.onreadystatechange = function() {
-            if (xmlHttp.readyState === 4){
+      if (xmlHttp.readyState === 4){
 		document.getElementById('upload-loader').style.display = 'none';
-        	alert(xmlHttp.response);
-            }
+		console.log('response type: ', typeof(xmlHttp.response));
+		if(xmlHttp.response === 0 || xmlHttp.response === '0')
+		    alert('Layer added successfully!');
+		else if (xmlHttp.response === 1 || xmlHttp.response === '1')
+		    alert('Layer creation failed.')
+		else
+		    alert('Oops! Something went wrong.')
+	  }
 	}
 	xmlHttp.open("POST", url, true);
 	xmlHttp.send(data);
