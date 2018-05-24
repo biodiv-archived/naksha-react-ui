@@ -3,7 +3,8 @@ import Config from '../common/config.js'
 var mapboxgl = require('mapbox-gl')
 var GoogleMapsLoader = require('google-maps')
 
-var baseUrl = null
+var baseUrl = null;
+var geoserverBaseUrl = null
 var workspace_name = 'biodiv'
 var thumbnailsUrl = null
 
@@ -24,8 +25,9 @@ var map_props = null;
 
 function initMap(props) {
     map_props = props;
-    baseUrl = "https://" + props.contextUrl + "/naksha/geoserver/"
-    thumbnailsUrl = baseUrl + "thumbnails/";
+    baseUrl = "https://" + props.contextUrl + "/naksha/"
+    geoserverBaseUrl = baseUrl + "geoserver/"
+    thumbnailsUrl = geoserverBaseUrl + "thumbnails/";
     var india_center = {lat: 25, lng: 77};
     var zoom = 3;
     // var gZoom = zoom + 1; // Google zoom levels are one higher than mapboxgl
@@ -92,7 +94,7 @@ function addStateBoundaryLayer(map, groupName) {
 		var source = {
 			"type": "vector",
 			"scheme": "tms",
-			"tiles": [baseUrl + "gwc/service/tms/1.0.0/biodiv:lyr_116_india_states/{z}/{x}/{y}"]
+			"tiles": [geoserverBaseUrl + "gwc/service/tms/1.0.0/biodiv:lyr_116_india_states/{z}/{x}/{y}"]
 		};
 		var layer = {
 			"id": LAYER_NAME,
@@ -205,14 +207,14 @@ function set_map_style(style){
 // style_name should be combination of layer name and the attribute
 // on which the styling is needed
 function getStyle(style_name){
-    var style_file_url = baseUrl + "styles/" + style_name + ".json"
+    var style_file_url = geoserverBaseUrl + "styles/" + style_name + ".json"
     var style = httpGetAsync(style_file_url);
     return JSON.parse(style);
 }
 
 // gets all available styles for a layer
 function getAvailableStyles(layer){
-    var styleFileUrl = baseUrl + "layers/" + layer + "/styles"
+    var styleFileUrl = geoserverBaseUrl + "layers/" + layer + "/styles"
     var styles = httpGetAsync(styleFileUrl);
     var stylesJson = JSON.parse(styles);
     return stylesJson;
@@ -239,8 +241,8 @@ function httpGetAsync(theUrl, isXML=false)
 }
 
 function getAvailableLayers(){
-    // var url = baseUrl + workspace_name + '/ows?SERVICE=WFS&REQUEST=GetCapabilities';
-    var url = baseUrl + 'layers/' + workspace_name + '/wfs';
+    // var url = geoserverBaseUrl + workspace_name + '/ows?SERVICE=WFS&REQUEST=GetCapabilities';
+    var url = geoserverBaseUrl + 'layers/' + workspace_name + '/wfs';
     console.log(url);
     var layers = [];
     var isXML = true;
@@ -398,7 +400,7 @@ function expand_layer_details(layer_id) {
     // On first time opening, fetch the thumbnail and show
     var thumb_div = div.getElementsByClassName('layer-thumb')[0];
     console.log('id', expanded_div_id);
-    console.log(baseUrl + layer_id + '_thumb.gif')
+    console.log(geoserverBaseUrl + layer_id + '_thumb.gif')
     console.log('children', thumb_div.children)
     if (thumb_div.children.length === 0){
         console.log('thumb', layer_id);
@@ -410,8 +412,27 @@ function expand_layer_details(layer_id) {
     }
 }
 
+function getFilteredLayers(layers) {
+    var groupName = map_props.groupName;
+    if (groupName === 'undefined' || groupName === null)
+        return layers; // no filtering required
+    var filteredLayers = [];
+    if (groupName === 'assambiodiversity') {
+        var url = baseUrl + "layer/tags?tag=assam";
+        console.log(url);
+	var groupLayers = httpGetAsync(url);
+	return layers.filter(function(l) {
+	    return groupLayers.includes(l.name);
+        })
+    }
+    else
+	return layers;
+    
+}
+
 function populateLayerPanel() {
-    var layers = getAvailableLayers();
+    var all_layers = getAvailableLayers();
+    var layers = getFilteredLayers(all_layers); 
     var nav_pane = document.getElementById('nav-all-layers');
 
     var layer_pane_html = nav_pane.innerHTML;
@@ -463,7 +484,7 @@ function add_layer_to_map(layerName, layerTitle, layerBbox){
 
 function append_new_style(style){
     Object.keys(style.sources).forEach(function(key){
-		style.sources[key].tiles = [baseUrl + "gwc/service/tms/1.0.0/" + getWorkspace() + ":" + style.layers[0].id + "/{z}/{x}/{y}"];
+		style.sources[key].tiles = [geoserverBaseUrl + "gwc/service/tms/1.0.0/" + getWorkspace() + ":" + style.layers[0].id + "/{z}/{x}/{y}"];
         map.addSource(key, style.sources[key]);
     })
 
@@ -542,7 +563,7 @@ function addLayerToSelectedTab(layerName, layerTitle, layerBbox, all_styles, sty
 	    +       "<i class='fa fa-chevron-right' style='font-size:10px;margin:2%;'></i>"
 	    +   "</div>"
 
-	    +   "<img id='"+layerName+"_legend' class='hide legend' src=" + baseUrl + "legend/" + layerName + "/" + all_styles[0].styleName+"></img>"
+	    +   "<img id='"+layerName+"_legend' class='hide legend' src=" + geoserverBaseUrl + "legend/" + layerName + "/" + all_styles[0].styleName+"></img>"
             +"</div>"
 
     selectedLayersPanel.innerHTML = html;
@@ -567,7 +588,7 @@ function changeLayerStyle(layerName, layerStyleSelector) {
 
     // update the legend according to new style
     var legend = document.getElementById(layerName + '_legend');
-    legend.src = baseUrl + "legend/" + layerName + "/" + selectedStyle
+    legend.src = geoserverBaseUrl + "legend/" + layerName + "/" + selectedStyle
 }
 
 function setOpacity(layerName, layerType, opacity) {

@@ -319,7 +319,7 @@ function uploadFiles() {
 
 	metadata_json['status'] = 1;
 	data.append('metadata', createMetadataFile(dataType, metadata_json));
-	var url = "https://" + props.contextUrl + "/naksha/geoserver/uploadshp";
+	var url = "https://" + props.contextUrl + "/naksha/layer/uploadshp";
 	console.log(url);
 	var xmlHttp = new XMLHttpRequest();
 	xmlHttp.onreadystatechange = function() {
