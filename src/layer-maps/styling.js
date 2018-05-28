@@ -110,9 +110,7 @@ function addStateBoundaryLayer(map, groupName) {
 		};
 		map.on('load', function(){
 		  map.addSource(LAYER_NAME, source);
-		  console.log(map);
 		  map.addLayer(layer);
-		  console.log(map);
 		})
 		fixed_layers.push(LAYER_NAME);
 	}
@@ -243,14 +241,12 @@ function httpGetAsync(theUrl, isXML=false)
 function getAvailableLayers(){
     // var url = geoserverBaseUrl + workspace_name + '/ows?SERVICE=WFS&REQUEST=GetCapabilities';
     var url = geoserverBaseUrl + 'layers/' + workspace_name + '/wfs';
-    console.log(url);
     var layers = [];
     var isXML = true;
 	var response = httpGetAsync(url, isXML);
     var featureTypeList = response.getElementsByTagName('FeatureTypeList')[0];
     for (var i = 0; i < featureTypeList.childNodes.length; i++){
         var feature = featureTypeList.childNodes[i];
-        // console.log(feature)
         var layer_info = getLayerInfo_WMS_3(feature);
         if (layer_info !== undefined){
                 layers.push(layer_info);
@@ -399,16 +395,12 @@ function expand_layer_details(layer_id) {
 
     // On first time opening, fetch the thumbnail and show
     var thumb_div = div.getElementsByClassName('layer-thumb')[0];
-    console.log('id', expanded_div_id);
-    console.log(geoserverBaseUrl + layer_id + '_thumb.gif')
-    console.log('children', thumb_div.children)
     if (thumb_div.children.length === 0){
-        console.log('thumb', layer_id);
-	//uncomment following to get thumbnails through naksha
-	thumb_div.insertAdjacentHTML('afterbegin', "<img src=" + thumbnailsUrl + layer_id + "_thumb.gif onerror='this.src=" + thumbnailsUrl + "no_preview.png' style='width: 100%;height: 100%;'></img>")
+	  //uncomment following to get thumbnails through naksha
+	  thumb_div.insertAdjacentHTML('afterbegin', "<img src=" + thumbnailsUrl + layer_id + "_thumb.gif onerror='this.src=" + thumbnailsUrl + "no_preview.png' style='width: 100%;height: 100%;'></img>")
 
-	//uncomment following to get thumbnails directly from geoserver
-	//thumb_div.insertAdjacentHTML('afterbegin', "<img src=http://" + get_host() + "/geoserver/www/map_thumbnails/" + layer_id +"_thumb.gif></img>")
+	  //uncomment following to get thumbnails directly from geoserver
+	  //thumb_div.insertAdjacentHTML('afterbegin', "<img src=http://" + get_host() + "/geoserver/www/map_thumbnails/" + layer_id +"_thumb.gif></img>")
     }
 }
 
@@ -419,14 +411,13 @@ function getFilteredLayers(layers) {
     var filteredLayers = [];
     if (groupName === 'assambiodiversity') {
         var url = baseUrl + "layer/tags?tag=assam";
-        console.log(url);
-	var groupLayers = httpGetAsync(url);
-	return layers.filter(function(l) {
-	    return groupLayers.includes(l.name);
+	    var groupLayers = httpGetAsync(url);
+	    return layers.filter(function(l) {
+	        return groupLayers.includes(l.name);
         })
     }
     else
-	return layers;
+	    return layers;
     
 }
 
@@ -614,17 +605,14 @@ function remove_layer_from_map(layer_name){
     if (index === -1){
         alert("Layer " + layer_name + " is not present on the map");
     }
-    console.log("Removing source " + layer_name)
     if (map.getLayer(layer_name+'-highlighted') !== undefined)
         map.removeLayer(layer_name+'-highlighted');
     map.removeLayer(layer_name);
     map.removeSource(layer_name);
     document.getElementById("add_" + layer_name + "_button").classList.toggle('hide');
     document.getElementById("rem_" + layer_name + "_button").classList.toggle('hide');
-    console.log(active_layers);
     active_layers.splice(index, 1);
     //active_layers.splice(layer_name+'-highlighted', 1);
-    console.log(active_layers);
 
     // remove the layer styler from selected layers tab
     var element = document.getElementById(layer_name + '_styler');
