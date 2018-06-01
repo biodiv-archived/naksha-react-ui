@@ -462,10 +462,11 @@ function add_layer_to_map(layerName, layerTitle, layerBbox){
         return;
     }
     var allStyles = getAvailableStyles(layerName)
+    // allStyles contains extra entry of default style at first position
     var defaultStyle = allStyles.splice(0, 1)[0];
     var style = getStyle(defaultStyle.styleName);
     append_new_style(style);
-    addLayerToSelectedTab(layerName, layerTitle, layerBbox, allStyles, style)
+    addLayerToSelectedTab(layerName, layerTitle, layerBbox, allStyles, defaultStyle, style)
     document.getElementById("add_" + layerName + "_button").classList.toggle('hide');
     document.getElementById("rem_" + layerName + "_button").classList.toggle('hide');
     active_layers.push(layerName);
@@ -520,14 +521,17 @@ function getIntersectionWithHardBounds(Bbox) {
     return [[left, down],[right, up]];
 }
 
-function addLayerToSelectedTab(layerName, layerTitle, layerBbox, all_styles, style){
+function addLayerToSelectedTab(layerName, layerTitle, layerBbox, all_styles, defaultStyle, style){
     var selectedLayersPanel = document.getElementById('nav-selected-layers');
     var html = selectedLayersPanel.innerHTML;
     var layerType = style.layers[0].type; //circle or fill
     var styleSelectorHTML = ""
     var styleNameToTitleMap = {};
     all_styles.forEach(function(style){
-	styleSelectorHTML += "<option value=" + style.styleName + ">" + style.styleTitle + "</option>";
+	styleSelectorHTML += "<option value=" + style.styleName;
+	if (style.styleName === defaultStyle.styleName)
+            styleSelectorHTML += " selected";
+	styleSelectorHTML += ">" + style.styleTitle + "</option>";
 	styleNameToTitleMap[style.styleName] = style.styleTitle;
     })
     layerToStyleOptionsMap[layerName] = styleNameToTitleMap;
