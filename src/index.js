@@ -10,6 +10,7 @@ import './css/style.json'
 import MapHolder from './MapHolder';
 import Layers from './layer-maps/Layers';
 import NewLayerComponent from './layer-maps/NewLayerComponent'
+import IndiaBoundaries from './common/india-boundaries.js'
 
 // import React from 'react';
 // import ReactDOM from 'react-dom';
@@ -30,5 +31,6 @@ import NewLayerComponent from './layer-maps/NewLayerComponent'
 export default {
   MapHolder : MapHolder,
   Layers : Layers,
-  NewLayerComponent: NewLayerComponent
+  NewLayerComponent: NewLayerComponent,
+  IndiaBoundaries: IndiaBoundaries
 }
