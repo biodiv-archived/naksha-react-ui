@@ -2,12 +2,14 @@ import Config from '../common/config.js'
 var shapefile = require('shapefile');
 var Pikaday = require('pikaday');
 
+var selectedRasterFiles = null;
 var props = null;
 var root_container;
+var fileNameForSingleRaster=null;
 const MAX_ROW_COUNT = 5;
 
 function init(params) {
-    props = params;
+	props = params;
 	root_container = document.getElementById('add-layer-component');
 	root_container.innerHTML = createAddLayersPanel();
 }
@@ -17,8 +19,8 @@ function init(params) {
 function createAddLayersPanel(){
 	var html =  "<div class=add-layer-panel>"
 				+ "<label>Please select input type</label><br>"
-				+ "<input type='radio' name='fileType' value='shape' onChange='setDataUploadType(this.value)' checked=true> Shape File"
-				+ "<input type='radio' name='fileType' value='raster' onChange='setDataUploadType(this.value)'> Raster File<br><br>"
+				+ "<input type='radio' class='data-type-input' name='fileType' value='shape' onChange='setDataUploadType(this.value)' checked=true> Shape File"
+				+ "<input type='radio' class='data-type-input' name='fileType' value='raster' onChange='setDataUploadType(this.value)'> Raster File<br><br>"
 				+ "<div id='shape-file-data' class='grey-border'>"
 				+   "<label>Select shape file   </label>"
 				+   "<input type='file' accept='.shp' id='inputShpFiles' name='files[]'><br><br>"
@@ -31,26 +33,80 @@ function createAddLayersPanel(){
 				+   "<div id='dbf-data-table-div' class='dbf-table'></div>"
 				+ "</div>"
 				+ "<div id='raster-file-data' class='hide grey-border'>"
-				+   "<label>Select tiff file   </label>"
+				/*+   "<label>Select tiff file   </label>"
 				+   "<input type='file' id='inputTiffFiles' name='files[]'><br><br>"
 				+   "<label>Select dbf file   </label>"
-				+   "<input type='file' id='inputRasterDbfFiles' name='files[]'><br><br>"
-				+   "<input type='submit' class='' id='upload-submit-raster' value='Go!' onclick='displayRasterDataForm()'>"
-				+   "<br><br>"
+				+   "<input type='file' id='inputRasterDbfFiles' name='files[]'><br><br>"*/
+				+   "<label>Select Raster data folder</label>"
+				+   "<input type='file' id='inputTiffFiles' webkitdirectory mozdirectory name='files[]' onchange='displayRasterDataForm(this)'><br>"
+				+   "<div id='layer-list'></div>"
+				//+   "<input type='submit' class='' id='upload-submit-raster' value='Go!' onclick='displayRasterDataForm()'>"
+				//+   "<br><br>"
 				+ "</div>"
 				+ "</div>"
 
 	return html;
 }
 
+function parseRasterDataFolder(fileSelector) {
+	var fileList = fileSelector.files;
+	if (fileList.length === 0){
+		// Either directory is empty or user clicked 'Cancel'.
+		// There is no way of knowing this. So we'll treat both
+		// cases in the same way and display a message and exit.
+		alert('Please select a valid directory!')
+		return;
+	}
+	// User has selected a directory with files.
+	// We'll find .tif files in the directory
+	console.log('files:', fileList);
+	var n = fileList.length;
+	var layers = [];
+	for (var i = 0; i < n; i++){
+		var file = fileList[i];
+		console.log(file.name);
+		var words = file.name.split('.');
+		if (words.length === 1) // no file extension, ignore this file
+			continue;
+		var name = words[0];
+		var ext = words[words.length - 1];
+		if (ext === 'tif') // valid extension
+			layers.push(name);
+	}
+	var html;
+	if (layers.length === 0) {
+		// no tif files found in directory
+		alert('No tif files present in the selected directory');
+		return false;
+	}
+	if (layers.length === 1){ // if single layer detected, show layer name to user
+	fileNameForSingleRaster=layers[0];
+	html = "<p>Layer detected: <b>" + layers[0] + "</b><p>";
+	}
+	else { // if multiple layer selected, ask user which layer to upload
+		var optionsHtml;
+		for (var key in layers) {
+			optionsHtml += "<option>" + layers[key] + "</option>"
+		}
+
+		html = "<span>Multiple layers found in directory. Please select layer to upload: "
+		     + "<select id='raster_upload_layer'>"
+		     + optionsHtml
+		     + "</select></span>"
+	}
+	document.getElementById('layer-list').innerHTML = html;
+}
+
 function displayShapeDataForm() {
 	handleShapeFileSelect(addMetadataComponent);
 }
 
-function displayRasterDataForm() {
-	document.getElementById('upload-submit-raster').classList.add('hide');
-	handleRasterFileSelect();
-	addMetadataComponent(null);
+function displayRasterDataForm(fileSelector) {
+	parseRasterDataFolder(fileSelector);
+	//document.getElementById('upload-submit-raster').classList.add('hide');
+	//handleRasterFileSelect();
+	if (document.getElementById('raster-file-data').getElementsByClassName('metadata').length === 0)
+		addMetadataComponent(null);
 }
 
 /*function displayShapeDataForm() {
@@ -64,7 +120,7 @@ function displayRasterDataForm() {
 function addMetadataComponent(col_names) {
 	console.log('adding metadata component');
 	var dataType = document.querySelector('input[name="fileType"]:checked').value
-	var html = "<div id='metadata-component'>"
+	var html = "<div id='metadata-component' class='metadata'>"
 	var styleColumnHtml = ""
 	if (col_names) {
 		styleColumnHtml = "<tr><td data-name='color_by'>Default Styling Column</td><td>"
@@ -74,7 +130,20 @@ function addMetadataComponent(col_names) {
 		})
 		styleColumnHtml += "</select>" + "</td></tr>";
 	}
-	var detailsHtml = "<table id='metadata_table'>"
+
+	if (dataType === 'raster') {
+		styleColumnHtml = "<fieldset><legend class='style-legend'>Style</legend>"
+				+ "<p>How do you want to style the layer?</p>"
+				+ "<input type='radio' name='rasterStyleType' value='default'>Default grey-scale<br>"
+				+ "<input type='radio' name='rasterStyleType' value='sld'>Upload sld file "
+				+   "<input type='file' accept='.sld' id='rasterSldFile' name='files[]'><br>"
+				+ "<input type='radio' name='rasterStyleType' value='dbf'>Upload dbf file "
+				+   "<input type='file' accept='.dbf' id='rasterDbfFile' name='files[]'><br>"
+				+ "<input type='radio' name='rasterStyleType' value='ramp'>Choose Color ramp<br>"
+				+ "</fieldset>"
+	
+	}
+	var detailsHtml = "<table id='metadata-table'>"
 					+ styleColumnHtml
 					+ "<tr><td data-name='layer_name'>Layer Name</td><td><input/></td></tr>"
 					+ "<tr><td data-name='layer_description'>Layer Description</td><td><textarea style='width:100%' rows='5' cols='50'></textarea></td></tr>"
@@ -274,7 +343,7 @@ function uploadFiles() {
 	var metadata_json = {};
 	var dataType = document.querySelector('input[name="fileType"]:checked').value;
 
-	if (dataType == 'shape') {
+	if (dataType === 'shape') {
 		var title_column = "'" + document.querySelector('input[name="titleColumn"]:checked').value + "'";
 		var summary_columns = document.querySelectorAll('input[name="summaryColumn"]:checked')
 		var summary_columns_names = []
@@ -284,11 +353,27 @@ function uploadFiles() {
 
 		metadata_json['title_column'] = title_column;
 		metadata_json['summary_columns'] = summary_columns_names;
+	} else if (dataType === 'raster') {
+		// read the styling information. how to style and required files/ inputs
+		var styleType=document.querySelector('input[name="rasterStyleType"]:checked').value	
+		if(styleType==='sld'){
+			var sldFiles=document.getElementById('rasterSldFile').files;
+			for(var i=0;i<files.length;i++){
+		
+			}
+		}	
+		
+		if(styleType=='dbf'){
+			dbfFiles=document.getElementById('rasterDbfFile').files;
+		
+		}
+
 	}
 
 	
-	var meta_table = document.getElementById('metadata_table');
+	var meta_table = document.getElementById('metadata-table');
 	var num_rows = meta_table.rows.length;
+	// parse the input fields and create a JSON of all values.
 	for (var i = 0; i < num_rows; i++) {
 		var keyCells = meta_table.rows[i].cells[0]
 		var objCells = meta_table.rows[i].cells[1].children[0];
@@ -311,19 +396,41 @@ function uploadFiles() {
 		data.append('dbf', document.getElementById('inputVectorDbfFiles').files[0]);
 	}
 	else if (dataType === 'raster') {
-		var tiffFile = document.getElementById('inputTiffFiles').files[0];
-		metadata_json['layer_tablename'] = tiffFile.name.replace(".tiff", "").toLowerCase();
-		data.append('raster', tiffFile);
-		data.append('dbf', document.getElementById('inputRasterDbfFiles').files[0])
+	// depending on the layer selected to be uploaded, select and upload all
+	// handle single layer case
+	// handle multiple layer present in dir.. upload the one which is selected by user.
+
+	// for the selected layer, upload all files of the type 'Layer_name'.<any_extension>
+	var files = document.getElementById('inputTiffFiles').files;
+	var fileNameToSearch;
+
+	if(fileNameForSingleRaster){
+		fileNameToSearch=fileNameForSingleRaster;
+	} else {
+		var layerName = document.getElementById("raster_upload_layer").value;
+		if(layerName){
+			fileNameToSearch=layerName;
+		}
+	}
+
+	for(var i=0; i < files.length; i++){
+		var name = files[i].name.split(".")[0];
+		if (name === fileNameToSearch) {
+			data.append("raster" + i, files[i])
+		}
+	}
+	
+// all files related to that layer.
 	}
 
 	metadata_json['status'] = 1;
 	data.append('metadata', createMetadataFile(dataType, metadata_json));
+	// url to be used for raster upload is /naksha/layer/uplaodRaster
 	var url = "https://" + props.contextUrl + "/naksha/layer/uploadshp";
 	console.log(url);
 	var xmlHttp = new XMLHttpRequest();
 	xmlHttp.onreadystatechange = function() {
-      if (xmlHttp.readyState === 4){
+     	 if (xmlHttp.readyState === 4){
 		document.getElementById('upload-loader').style.display = 'none';
 		console.log('response type: ', typeof(xmlHttp.response));
 		if(xmlHttp.response === 0 || xmlHttp.response === '0')
@@ -340,15 +447,6 @@ function uploadFiles() {
 	document.getElementById('shape_submit_btn').style.opacity = 0.5;
 	document.getElementById('add-layer-component').insertAdjacentHTML('beforeend', '<div id="upload-loader" class="loader"></div>');
 }
-
-/*function WriteToFile(passForm) { 
-		set fso = CreateObject("Scripting.FileSystemObject"); 
-	set s = fso.CreateTextFile("C:\test.txt", True); 
-	s.writeline("HI"); 
-	s.writeline("Bye"); 
-	s.writeline("-----------------------------"); 
-	s.Close(); 
-}*/
 
 function createMetadataFile(dataType, metadata_json) {
 	var content = "";
@@ -379,7 +477,8 @@ export default {
 }
 
 window.handleShapeFileSelect   		=handleShapeFileSelect
-window.setDataUploadType			=setDataUploadType
-window.displayShapeDataForm			=displayShapeDataForm
-window.uploadFiles					=uploadFiles
+window.setDataUploadType		=setDataUploadType
+window.displayShapeDataForm		=displayShapeDataForm
+window.uploadFiles			=uploadFiles
 window.displayRasterDataForm		=displayRasterDataForm
+window.parseRasterDataFolder		=parseRasterDataFolder
