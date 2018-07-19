@@ -85,7 +85,7 @@ function parseRasterDataFolder(fileSelector) {
 	}
 	else { // if multiple layer selected, ask user which layer to upload
 		var optionsHtml;
-		for (var key in layers) {
+		for (var key in rasterLayers) {
 			optionsHtml += "<option>" + rasterLayers[key] + "</option>"
 		}
 
@@ -432,7 +432,7 @@ function uploadFiles() {
 	metadata_json['status'] = 1;
 	data.append('metadata', createMetadataFile(dataType, metadata_json));
 	// url to be used for raster upload is /naksha/layer/uplaodRaster
-	var url = "https://" + props.contextUrl + "/naksha/layer/upload" + (dataType === shape ? 'shp' : 'Raster');
+	var url = "https://" + props.contextUrl + "/naksha/layer/upload" + (dataType === 'shape' ? 'shp' : 'Raster');
 	console.log(url);
 	var xmlHttp = new XMLHttpRequest();
 	xmlHttp.onreadystatechange = function() {
