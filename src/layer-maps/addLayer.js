@@ -5,6 +5,7 @@ var Pikaday = require('pikaday');
 var selectedRasterFiles = null;
 var props = null;
 var root_container;
+var rasterLayers = null;
 var fileNameForSingleRaster=null;
 const MAX_ROW_COUNT = 5;
 
@@ -61,7 +62,7 @@ function parseRasterDataFolder(fileSelector) {
 	// We'll find .tif files in the directory
 	console.log('files:', fileList);
 	var n = fileList.length;
-	var layers = [];
+	rasterLayers = [];
 	for (var i = 0; i < n; i++){
 		var file = fileList[i];
 		console.log(file.name);
@@ -71,22 +72,21 @@ function parseRasterDataFolder(fileSelector) {
 		var name = words[0];
 		var ext = words[words.length - 1];
 		if (ext === 'tif') // valid extension
-			layers.push(name);
+			rasterLayers.push(name);
 	}
 	var html;
-	if (layers.length === 0) {
+	if (rasterLayers.length === 0) {
 		// no tif files found in directory
 		alert('No tif files present in the selected directory');
 		return false;
 	}
-	if (layers.length === 1){ // if single layer detected, show layer name to user
-	fileNameForSingleRaster=layers[0];
-	html = "<p>Layer detected: <b>" + layers[0] + "</b><p>";
+	if (rasterLayers.length === 1){ // if single layer detected, show layer name to user
+		html = "<p>Layer detected: <b>" + rasterLayers[0] + "</b><p>";
 	}
 	else { // if multiple layer selected, ask user which layer to upload
 		var optionsHtml;
 		for (var key in layers) {
-			optionsHtml += "<option>" + layers[key] + "</option>"
+			optionsHtml += "<option>" + rasterLayers[key] + "</option>"
 		}
 
 		html = "<span>Multiple layers found in directory. Please select layer to upload: "
@@ -355,7 +355,7 @@ function uploadFiles() {
 		metadata_json['summary_columns'] = summary_columns_names;
 	} else if (dataType === 'raster') {
 		// read the styling information. how to style and required files/ inputs
-		var styleType=document.querySelector('input[name="rasterStyleType"]:checked').value	
+		/*var styleType=document.querySelector('input[name="rasterStyleType"]:checked').value	
 		if(styleType==='sld'){
 			var sldFiles=document.getElementById('rasterSldFile').files;
 			for(var i=0;i<files.length;i++){
@@ -366,7 +366,7 @@ function uploadFiles() {
 		if(styleType=='dbf'){
 			dbfFiles=document.getElementById('rasterDbfFile').files;
 		
-		}
+		}*/
 
 	}
 
@@ -388,45 +388,51 @@ function uploadFiles() {
 	console.log('metadata', metadata_json);
 
 	var data = new FormData();
+	
 	if (dataType === 'shape') {
 		var shpFile = document.getElementById('inputShpFiles').files[0];
 		metadata_json['layer_tablename'] = shpFile.name.replace(".shp", "").toLowerCase();
 		data.append('shp', shpFile);
 		data.append('shx', document.getElementById('inputShxFiles').files[0]);
 		data.append('dbf', document.getElementById('inputVectorDbfFiles').files[0]);
-	}
-	else if (dataType === 'raster') {
-	// depending on the layer selected to be uploaded, select and upload all
-	// handle single layer case
-	// handle multiple layer present in dir.. upload the one which is selected by user.
-
-	// for the selected layer, upload all files of the type 'Layer_name'.<any_extension>
-	var files = document.getElementById('inputTiffFiles').files;
-	var fileNameToSearch;
-
-	if(fileNameForSingleRaster){
-		fileNameToSearch=fileNameForSingleRaster;
-	} else {
-		var layerName = document.getElementById("raster_upload_layer").value;
-		if(layerName){
-			fileNameToSearch=layerName;
+	} else if (dataType === 'raster') {
+		// depending on the layer selected to be uploaded, select and upload all
+		// handle single layer case
+		// handle multiple layer present in dir.. upload the one which is selected by user.
+        	
+		// for the selected layer, upload all files of the type 'Layer_name'.<any_extension>
+		var files = document.getElementById('inputTiffFiles').files;
+		var fileNameToSearch;
+        	
+		if(rasterLayers.length === 1){
+			// if single layer is present in the selected directory
+			fileNameToSearch = rasterLayers[0];
+		} else {
+			// if multiple layers present in selected directory,
+			// check which layer is selected by the user to be uploaded.
+			var layerName = document.getElementById("raster_upload_layer").value;
+			if(layerName){
+				fileNameToSearch = layerName;
+			} else {
+				alert("Please select a layer to upload!")
+				return;
+			}
 		}
-	}
-
-	for(var i=0; i < files.length; i++){
-		var name = files[i].name.split(".")[0];
-		if (name === fileNameToSearch) {
-			data.append("raster" + i, files[i])
+        	
+		// add all files related to that layer.
+		for(var i = 0; i < files.length; i++){
+			var name = files[i].name.split(".")[0];
+			if (name === fileNameToSearch) {
+				data.append("raster" + i, files[i])
+			}
 		}
-	}
-	
-// all files related to that layer.
+		
 	}
 
 	metadata_json['status'] = 1;
 	data.append('metadata', createMetadataFile(dataType, metadata_json));
 	// url to be used for raster upload is /naksha/layer/uplaodRaster
-	var url = "https://" + props.contextUrl + "/naksha/layer/uploadshp";
+	var url = "https://" + props.contextUrl + "/naksha/layer/upload" + (dataType === shape ? 'shp' : 'Raster');
 	console.log(url);
 	var xmlHttp = new XMLHttpRequest();
 	xmlHttp.onreadystatechange = function() {
@@ -446,6 +452,10 @@ function uploadFiles() {
 	document.getElementById('shape_submit_btn').disabled = true;
 	document.getElementById('shape_submit_btn').style.opacity = 0.5;
 	document.getElementById('add-layer-component').insertAdjacentHTML('beforeend', '<div id="upload-loader" class="loader"></div>');
+}
+
+function addDataFiles() {
+
 }
 
 function createMetadataFile(dataType, metadata_json) {
