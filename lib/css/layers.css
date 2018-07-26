@@ -418,7 +418,7 @@
 	border: none;
 }
 
-#metadata-component input {
+#metadata-table input {
 	width: 100%;
 	margin: 2% 0% 2% 0%;
 }
@@ -471,5 +471,40 @@ th {
 @keyframes spin {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
+}
+
+fieldset {
+    margin: 0 0 1% 0;
+    padding: 0 1% 1% 1%;
+    border: 1px solid black;
+}
+
+.style-legend {
+    width: auto;
+    margin-bottom: 0;
+    padding: 1%;
+    border: none;
+}
+
+input[type=radio] {
+    margin: 0 0.5% 0 0;
+}
+
+input[type=file] {
+    border: 1px solid lightgrey;
+    margin-left: 1.5%;
+}
+
+.data-type-input {
+    margin: 0 0 0 2% !important;
+}
+.listItemStyle{
+    height: "30px";
+    width: "40px";
+}
+.ulStyle{
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
 }
 /*-------------------------------------------------------*/

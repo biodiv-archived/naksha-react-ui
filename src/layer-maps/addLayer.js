@@ -9,6 +9,8 @@ var rasterLayers = null;
 var fileNameForSingleRaster=null;
 const MAX_ROW_COUNT = 5;
 
+var mapColorData = [["#abc","#abd","#aef"],["#123","#124","#345"],["#345","#234","#768"]];
+
 function init(params) {
 	props = params;
 	root_container = document.getElementById('add-layer-component');
@@ -114,7 +116,7 @@ function displayRasterDataForm(fileSelector) {
 		.then(function(){
 			addMetadataComponent();
 		);
-	
+
 }*/
 
 function addMetadataComponent(col_names) {
@@ -140,8 +142,9 @@ function addMetadataComponent(col_names) {
 				+ "<input type='radio' name='rasterStyleType' value='dbf'>Upload dbf file "
 				+   "<input type='file' accept='.dbf' id='rasterDbfFile' name='files[]'><br>"
 				+ "<input type='radio' name='rasterStyleType' value='ramp'>Choose Color ramp<br>"
+				+	"<div style='margin-left:20px'>" + getRampUI() + "</div>"
 				+ "</fieldset>"
-	
+
 	}
 	var detailsHtml = "<table id='metadata-table'>"
 					+ styleColumnHtml
@@ -153,7 +156,7 @@ function addMetadataComponent(col_names) {
 					+ getLayerTypeSelector()
 					+ "</td></tr>"
 	}
-	
+
 	detailsHtml		+= "<tr><td data-name='created_by'>Contributor</td><td><input/></td></tr>"
 					+ "<tr><td data-name='attribution'>Attribution</td><td><input/></td></tr>"
 					+ "<tr><td data-name='tags'>Tags</td><td><input/></td></tr>"
@@ -176,6 +179,18 @@ function addMetadataComponent(col_names) {
 			yearRange: yearRange
 		});
 	addSubmitButton(dataType)
+}
+
+function getRampUI() {
+	var result="";
+	for(var i=0;i<mapColorData.length;i++){
+		result=result+"<input style='position:absolute' type='radio' value="+i+" name='colorGrid'"+"><ul class='ulStyle' style='border:solid 1px black;display: inline-block'>";
+			for(var j=0;j<mapColorData[i].length;j++){
+					result=result+"<li class='listItemStyle' style='background-color:"+mapColorData[i][j]+";height:30px;width:40px"+"'"+"> </li>"
+				}
+		result=result+"</ul> </input>";
+	}
+	return result;
 }
 
 function addSubmitButton(dataType) {
@@ -230,7 +245,7 @@ function handleShapeFileSelect(callback) {
 		alert ('Please select a dbf file');
 		return false;
 	}
-	
+
 	// hide the 'Go!' button
 	document.getElementById('upload-submit-shape').classList.add('hide');
 
@@ -355,22 +370,30 @@ function uploadFiles() {
 		metadata_json['summary_columns'] = summary_columns_names;
 	} else if (dataType === 'raster') {
 		// read the styling information. how to style and required files/ inputs
-		/*var styleType=document.querySelector('input[name="rasterStyleType"]:checked').value	
+		var styleType=document.querySelector('input[name="rasterStyleType"]:checked').value
 		if(styleType==='sld'){
 			var sldFiles=document.getElementById('rasterSldFile').files;
 			for(var i=0;i<files.length;i++){
-		
-			}
-		}	
-		
-		if(styleType=='dbf'){
-			dbfFiles=document.getElementById('rasterDbfFile').files;
-		
-		}*/
 
+			}
+			metadata_json["styleType"]="sld";
+
+		}
+
+		if(styleType=='dbf'){
+			var dbfFiles=document.getElementById('rasterDbfFile').files;
+			metadata_json["styleType"]="dbf";
+
+		}
+		if(styleType=='ramp'){
+			var selected=document.querySelector('input[name="colorGrid"]:checked').value;
+			if(selected){
+				metadata_json["styleType"]="ramp";
+				metadata_json["value"]=mapColorData[parseInt(selected)]
+	}
+		}
 	}
 
-	
 	var meta_table = document.getElementById('metadata-table');
 	var num_rows = meta_table.rows.length;
 	// parse the input fields and create a JSON of all values.
@@ -388,7 +411,7 @@ function uploadFiles() {
 	console.log('metadata', metadata_json);
 
 	var data = new FormData();
-	
+
 	if (dataType === 'shape') {
 		var shpFile = document.getElementById('inputShpFiles').files[0];
 		metadata_json['layer_tablename'] = shpFile.name.replace(".shp", "").toLowerCase();
@@ -399,11 +422,11 @@ function uploadFiles() {
 		// depending on the layer selected to be uploaded, select and upload all
 		// handle single layer case
 		// handle multiple layer present in dir.. upload the one which is selected by user.
-        	
+
 		// for the selected layer, upload all files of the type 'Layer_name'.<any_extension>
 		var files = document.getElementById('inputTiffFiles').files;
 		var fileNameToSearch;
-        	
+
 		if(rasterLayers.length === 1){
 			// if single layer is present in the selected directory
 			fileNameToSearch = rasterLayers[0];
@@ -418,21 +441,22 @@ function uploadFiles() {
 				return;
 			}
 		}
-        	
+		var k=1;
 		// add all files related to that layer.
 		for(var i = 0; i < files.length; i++){
 			var name = files[i].name.split(".")[0];
 			if (name === fileNameToSearch) {
-				data.append("raster" + i, files[i])
+				data.append("raster" + k, files[i])
+				k++;
 			}
 		}
-		
+
 	}
 
 	metadata_json['status'] = 1;
 	data.append('metadata', createMetadataFile(dataType, metadata_json));
 	// url to be used for raster upload is /naksha/layer/uplaodRaster
-	var url = "https://" + props.contextUrl + "/naksha/layer/upload" + (dataType === 'shape' ? 'shp' : 'Raster');
+	var url = "http://localhost:8081"+ "/naksha/layer/upload" + (dataType === 'shape' ? 'shp' : 'raster');
 	console.log(url);
 	var xmlHttp = new XMLHttpRequest();
 	xmlHttp.onreadystatechange = function() {

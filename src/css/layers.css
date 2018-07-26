@@ -498,5 +498,13 @@ input[type=file] {
 .data-type-input {
     margin: 0 0 0 2% !important;
 }
-
+.listItemStyle{
+    height: "30px";
+    width: "40px";
+}
+.ulStyle{
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+}
 /*-------------------------------------------------------*/
