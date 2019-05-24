@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import Map from './Map';
 import Geohash from './geohash/geohash-geojson'
-import GeohashAggr from './geohash/geohash-aggregated-geojson'
+import * as GeohashAggr from './geohash/geohash-aggregated-geojson'
 import LegendStops from './legend-stops'
 import axios from 'axios';
 import mapboxgl from 'mapbox-gl';

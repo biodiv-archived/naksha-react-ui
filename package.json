@@ -25,18 +25,18 @@
     "eject": "react-scripts eject"
   },
   "dependencies": {
-    "axios": "^0.17.1",
+    "axios": "^0.18.0",
     "base-64": "^0.1.0",
-    "boundingbox": "^0.1.1",
+    "boundingbox": "^1.2.0",
     "font-awesome": "^4.7.0",
     "geohash": "0.0.1",
-    "google-maps": "^3.2.1",
-    "mapbox-gl": "^0.44.0",
-    "pikaday": "^1.7.0",
-    "react": "^16.2.0",
-    "react-collapsible": "^2.0.3",
-    "react-dom": "^16.2.0",
-    "react-scripts": "1.0.17",
+    "google-maps": "^3.3.0",
+    "mapbox-gl": "^0.54.0",
+    "pikaday": "^1.8.0",
+    "react": "^16.8.6",
+    "react-collapsible": "^2.6.0",
+    "react-dom": "^16.8.6",
+    "react-scripts": "3.0.1",
     "shapefile": "^0.6.6"
   },
   "devDependencies": {
@@ -44,6 +44,18 @@
     "babel-plugin-inline-json": "^1.2.2",
     "babel-plugin-transform-react-jsx": "^6.24.1",
     "babel-plugin-transform-strict-mode": "^6.24.1",
-    "babel-preset-env": "^1.6.1"
+    "babel-preset-env": "^1.7.0"
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
   }
 }
